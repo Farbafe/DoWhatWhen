@@ -1,24 +1,25 @@
-# 09
+# DoWhatWhen - Decide what to do and when as a group!
 
-## Project setup
-```
-npm install
-```
+DoWhatWhen is an online responsive vue.js powered group decision helper.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### Tech
 
-### Compiles and minifies for production
-```
-npm run build
-```
+DoWhatWhen uses [Vue.js].
 
-### Lints and fixes files
-```
-npm run lint
-```
+### Usage
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+TODO Coming soon
+
+### Contribution
+
+Contribution is welcome. Guidelines soon.
+
+License
+----
+
+MIT License
+
+Copyright (c) [2021] [Yehya Eldeeb]
+
+   [Vue.js]: <https://vuejs.org/>
+   [MIT License]: <https://opensource.org/licenses/MIT>

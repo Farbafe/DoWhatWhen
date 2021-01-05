@@ -1,6 +1,8 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
+import EventVote from "../components/EventVote.vue";
+import EventResult from "../components/EventResult.vue";
 
 Vue.use(VueRouter);
 
@@ -18,6 +20,16 @@ const routes: Array<RouteConfig> = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/About.vue")
+  },
+  {
+    path: "/event/vote/:id",
+    name: "EventVote",
+    component: EventVote
+  },
+  {
+    path: "/event/result/:id",
+    name: "EventResult",
+    component: EventResult
   }
 ];
 
