@@ -55,7 +55,11 @@
           Everyone can see the result.</b-checkbox
         ><br />
         <b-checkbox v-model="isCustomAnswersAdded">
-          User-provided answers are added to the choices of following users.</b-checkbox
+          User-provided answers are added to the choices of following
+          users.</b-checkbox
+        ><br />
+        <b-checkbox v-model="willEmailMe">
+          Send me an email when voting deadline is reached.</b-checkbox
         >
       </div>
       <!-- TODO only those who have been pre-approved can vote? i.e friends or list of emails -->
@@ -74,6 +78,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { v4 as uuidv4 } from "uuid";
 
 @Component
 export default class EventOptions extends Vue {
@@ -84,21 +89,31 @@ export default class EventOptions extends Vue {
   voteMethods = ["Single Vote", "Ranked Voting", "Multiple Votes"];
   isVoterAnonymous = true;
   isVoteChangeable = false;
-  isResultLive = false;
+  isResultLive = true;
   mustRankAll = false;
-  isResultPublic = true;
+  isResultPublic = false;
   isCustomAnswersAdded = false;
   isLoading = false;
-  
+  willEmailMe = true; // TODO these settings should be stored in localstorage so that
+  // if the user changes them, he only has to change them once! store email too
+
   done() {
     this.isLoading = true;
     setTimeout(() => {
+      // TODO
       // create new link every click, even if no options changed
       // throttle limit to some number in the backend
       // send email, voting method and question
       // also send answers and related options
+      // also send localidentifier if present, otherwise receive
+      // localidentifier (unique string to each browser) and store
+      // in localStorage
       // get event id
-      this.$store.commit("setEventId", "1250");
+      this.$store.commit("setEmail", this.email);
+      if (localStorage.getItem("eventAdminToken") === null) {
+        localStorage.setItem("eventAdminToken", uuidv4()); // then send to backend
+      }
+      this.$store.commit("setEventId", "1250"); // received by backend
       this.isLoading = false;
       this.$emit("done");
     }, 900);

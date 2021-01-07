@@ -5,7 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    eventId: "0",
+    eventId: "",
     question: "",
     canWriteCustom: "No", // TODO turn this into a boolean, state manages yes/no to true/false
     answers: "",

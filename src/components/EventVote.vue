@@ -21,6 +21,7 @@
       </p>
     </div>
     <div class="column is-half" v-if="!isExpired">
+      <fieldset :disabled="isVoteDone">
       <div class="field">
         <b-tag
           v-for="answer in answers"
@@ -28,7 +29,7 @@
           :type="chosen.includes(answer) ? 'is-success' : ''"
           rounded
           size="is-medium"
-          ><div class="is-clickable" @click="toggleAnswer(answer)">
+          ><div :class="{'is-clickable': !isVoteDone, 'is-not-allowed': isVoteDone}" @click="toggleAnswer(answer)">
             {{ answer }}
           </div></b-tag
         >
@@ -47,6 +48,7 @@
           >Vote</b-button
         >
       </div>
+      </fieldset>
     </div>
     <!-- the id of this event is: {{ this.$route.params.id }}
     {{ votingMethod }} {{ canWriteCustom }} -->
@@ -72,6 +74,7 @@ export default class EventVote extends Vue {
   mustRankAll = false;
   custom = "";
   isExpired = false;
+  isVoteDone = false;
 
   customInput() {
     const index = this.chosen.indexOf("__CUSTOM__VOTING__INPUT");
@@ -90,6 +93,9 @@ export default class EventVote extends Vue {
   }
 
   toggleAnswer(answer: string) {
+    if (this.isVoteDone) {
+      return;
+    }
     if (this.chosen.length === 1 && this.votingMethod === "Single Vote") {
       if (answer !== this.chosen[0]) {
         this.chosen = [];
@@ -144,6 +150,7 @@ export default class EventVote extends Vue {
     this.isVoteLoading = true;
     setTimeout(() => {
       this.isVoteLoading = false;
+      this.isVoteDone = true;
     }, 300);
   }
 
@@ -175,6 +182,9 @@ export default class EventVote extends Vue {
 </script>
 
 <style scoped>
+.is-not-allowed {
+  cursor: not-allowed;
+}
 .top-margin-tiny {
   margin-top: 0.3em;
 }

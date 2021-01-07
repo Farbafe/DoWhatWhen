@@ -87,7 +87,7 @@ export default class ShareEvent extends Vue {
       },
       (e) => {
         this.$buefy.toast.open({
-          message: "COULD NOT copy URL to clipboard!",
+          message: "Could NOT copy URL to clipboard!",
           type: "is-danger",
         });
         console.log(e);
@@ -96,6 +96,13 @@ export default class ShareEvent extends Vue {
   }
   done() {
     this.$emit("done");
+  }
+  created() {
+    this.sharing = {
+      url: window.location.origin + "/event/vote/" + this.$store.state.eventId,
+      title: "DoWhatWhen:" + this.$store.state.question,
+      description: "Choose what you want to do as a group!",
+    };
   }
 }
 </script>
@@ -114,19 +121,16 @@ export default class ShareEvent extends Vue {
   cursor: pointer;
   margin: 0 10px 10px 0;
 }
-
 .imitate-share-network i {
   background-color: rgba(0, 0, 0, 0.15);
   padding: 10px;
   flex: 0 1 auto;
 }
-
 .imitate-share-network span {
   padding: 10px;
   flex: 1 1 0%;
   font-weight: 500;
 }
-
 .share-network-list {
   display: flex;
   flex-direction: row;

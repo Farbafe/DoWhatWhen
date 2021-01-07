@@ -1,6 +1,9 @@
 <template>
   <div class="columms">
-    <div :class="{'column is-three-fifths is-offset-one-fifth': isUniqueUrl}" class="has-text-centered">
+    <div
+      :class="{ 'column is-three-fifths is-offset-one-fifth': isUniqueUrl }"
+      class="has-text-centered"
+    >
       <p v-if="!isUniqueUrl">
         Result can be viewed at this
         <router-link :to="'/event/result/' + this.$store.state.eventId"
@@ -8,7 +11,8 @@
         >.<br />
       </p>
       <p>
-        The event's question is <b>{{ question }}</b><br />
+        The event's question is <b>{{ question }}</b
+        ><br />
         <span v-if="isExpired"
           >The event reached its voting deadline at {{ votingDeadline }}.</span
         ><span v-else
@@ -16,14 +20,15 @@
           <span v-if="isResultLive"
             >You can track the live result of the event as it is being voted by
             keeping this page open.</span
-          ></span
-        ><br />
-        <span v-if="willEmail">
-          We will send you an email at {{ email }} when the voting deadline is reached!
+          ><span v-if="willEmail">
+          <br />We will send you an email at {{ this.email }} when the voting deadline is
+          reached!
         </span>
         <span v-else>
-          <a @click="setupEmail">Email me</a> when voting deadline is reached.
-        </span>
+          <br /><a @click="setupEmail">Email me</a> when voting deadline is reached.
+        </span></span
+        ><br />
+        
       </p>
       <p v-if="!isUniqueUrl">
         <a href="/">Click here</a> if you would like to submit another question!
@@ -31,8 +36,11 @@
     </div>
 
     <div class="column is-half is-offset-one-quarter" v-if="isUniqueUrl">
-      <p v-if="isExpired" class="is-size-4">As a group you chose: <b>{{ winners.join(", ") }}</b>.</p>
-        You can expand each choice to see who voted for it.
+      <p v-if="isExpired" class="is-size-4">
+        As a group you chose: <b>{{ winners.join(", ") }}</b
+        >.
+      </p>
+      You can expand each choice to see who voted for it.
       <b-table
         :data="data"
         :paginated="true"
@@ -81,43 +89,42 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component
 export default class EventResult extends Vue {
   isUniqueUrl = false;
-  question = "What shall we eat at the final dress rehearsal";
-  votingDeadline = new Date().toLocaleDateString() + new Date().toLocaleTimeString();
+  question = this.$store.state.question === "" ? "loading question" : this.$store.state.question;
+  votingDeadline = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
   isResultLoading = true; // TODO websocket.io for constant results showing
   isEmailRequestLoading = false;
   hasClearWinner = false;
   answers: Record<string, number> = {};
   isExpired = false;
   isResultLive = true;
-  email = "best@example.com";
   willEmail = false;
-  winners = ["burger", "NOTburger"]
+  winners = ["burger", "NOTburger"];
+  email = "";
 
-  setupEmail(forceIf = false, email: string) {
-    if (Math.random() > 0.5 || forceIf === true) {
-    // alright we either have the email address and send it or we don't have it
-    // or user is logged in and profile-wide no emails, so this is a force email on THIS one matter, ok?
+  setupEmail() {
+    if (this.email !== "") {
       this.isEmailRequestLoading = true;
       setTimeout(() => {
-      this.$buefy.toast.open({
-        message: "We will send you an email when done!",
-        type: "is-success",
-      });
-      this.willEmail = true;
-      this.email = email == null ? this.email : email;
-      this.isEmailRequestLoading = false;
+        this.$buefy.toast.open({
+          message: "We will send you an email when done!",
+          type: "is-success",
+        });
+        this.willEmail = true;
+        this.isEmailRequestLoading = false;
       }, 500);
-    }
-    else {
+    } else {
       this.$buefy.dialog.prompt({
-                message: "Enter your email address",
-                inputAttrs: {
-                    placeholder: "example@domain.com",
-                    type: "email"
-                },
-                trapFocus: true,
-                onConfirm: (value) => this.setupEmail(true, value)
-            });
+        message: "Enter your email address",
+        inputAttrs: {
+          placeholder: "example@domain.com",
+          type: "email",
+        },
+        trapFocus: true,
+        onConfirm: (value) => {
+          this.email = value;
+          this.setupEmail();
+        }
+      });
     }
   }
 
@@ -168,6 +175,9 @@ export default class EventResult extends Vue {
     }
     if (Math.random() > 0.5) {
       this.isExpired = true;
+    }
+    if (this.$store.state.email !== "") {
+      this.email = this.$store.state.email;
     }
   }
   // if live then show current results
