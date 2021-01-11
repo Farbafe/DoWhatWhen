@@ -21,6 +21,7 @@
         label-position="bottom"
         mobile-mode="compact"
         :has-navigation="false"
+        :destroy-on-hide="true"
       >
         <b-step-item step="1" label="Question" :clickable="false">
           <h1 class="title has-text-centered">Ask a question</h1>

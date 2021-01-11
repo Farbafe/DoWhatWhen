@@ -58,7 +58,7 @@
           User-provided answers are added to the choices of following
           users.</b-checkbox
         ><br />
-        <b-checkbox v-model="willEmailMe">
+        <b-checkbox v-model="willEmailAdmin">
           Send me an email when voting deadline is reached.</b-checkbox
         >
       </div>
@@ -79,10 +79,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 @Component
 export default class EventOptions extends Vue {
-  always = false;
   email = "";
   voteDeadline = new Date();
   voteMethod = "Single Vote";
@@ -94,29 +94,40 @@ export default class EventOptions extends Vue {
   isResultPublic = false;
   isCustomAnswersAdded = false;
   isLoading = false;
-  willEmailMe = true; // TODO these settings should be stored in localstorage so that
-  // if the user changes them, he only has to change them once! store email too
+  willEmailAdmin = true; 
 
   done() {
     this.isLoading = true;
-    setTimeout(() => {
-      // TODO
-      // create new link every click, even if no options changed
-      // throttle limit to some number in the backend
-      // send email, voting method and question
-      // also send answers and related options
-      // also send localidentifier if present, otherwise receive
-      // localidentifier (unique string to each browser) and store
-      // in localStorage
-      // get event id
-      this.$store.commit("setEmail", this.email);
-      if (localStorage.getItem("eventAdminToken") === null) {
-        localStorage.setItem("eventAdminToken", uuidv4()); // then send to backend
-      }
-      this.$store.commit("setEventId", "1250"); // received by backend
-      this.isLoading = false;
-      this.$emit("done");
-    }, 900);
+    this.$store.commit("setEmail", this.email);
+    if (localStorage.getItem("eventAdminToken") === null) {
+      localStorage.setItem("eventAdminToken", uuidv4());
+    }
+    const data = {
+      "event": {// TODO these settings should be stored in localstorage so that
+      // if the user changes them, he only has to change them once! store email too
+        "question": this.$store.state.question,
+        "admin_email": this.email,
+        "admin_token": localStorage.getItem("eventAdminToken"),
+        "can_write_custom": this.$store.state.canWriteCustom,
+        "is_voter_anonymous": this.isVoterAnonymous,
+        "is_vote_changeable": this.isVoteChangeable,
+        "is_result_live": this.isResultLive,
+        "must_rank_all": this.mustRankAll,
+        "is_custom_answers_added": this.isCustomAnswersAdded,
+        "will_email_admin": this.willEmailAdmin,
+        "voting_method": this.voteMethod,
+        "voting_deadline": this.voteDeadline
+      },
+      "answers": this.$store.state.answers
+    };
+    axios.post("http://127.0.0.1:8000/events", JSON.stringify(data))
+      .then((response) => {
+        this.isLoading = false;
+        this.$store.commit("setEventId", response.data.id);
+        this.$emit("done");
+      }).catch((error) => {
+        console.log(error);
+      });
   }
 }
 </script>

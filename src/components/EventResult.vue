@@ -21,14 +21,14 @@
             >You can track the live result of the event as it is being voted by
             keeping this page open.</span
           ><span v-if="willEmail">
-          <br />We will send you an email at {{ this.email }} when the voting deadline is
-          reached!
-        </span>
-        <span v-else>
-          <br /><a @click="setupEmail">Email me</a> when voting deadline is reached.
-        </span></span
+            <br />We will send you an email at {{ this.email }} when the voting
+            deadline is reached!
+          </span>
+          <span v-else>
+            <br /><a @click="setupEmail">Email me</a> when voting deadline is
+            reached.
+          </span></span
         ><br />
-        
       </p>
       <p v-if="!isUniqueUrl">
         <a href="/">Click here</a> if you would like to submit another question!
@@ -73,9 +73,11 @@
         </b-table-column>
         <template slot="detail" slot-scope="props">
           <div>
-            <b-tag v-for="voter in props.row.voters" :key="voter">{{
-              voter
-            }}</b-tag>
+            <b-tag
+              v-for="voter in props.row.voters"
+              :key="voter"
+              ><div @click="changeVoters(props.row.choice)" class="is-clickable">{{ voter }}</div></b-tag
+            >
           </div>
         </template>
       </b-table>
@@ -85,12 +87,17 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import axios from "axios";
 
 @Component
 export default class EventResult extends Vue {
   isUniqueUrl = false;
-  question = this.$store.state.question === "" ? "loading question" : this.$store.state.question;
-  votingDeadline = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+  question =
+    this.$store.state.question === ""
+      ? "loading question"
+      : this.$store.state.question;
+  votingDeadline =
+    new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
   isResultLoading = true; // TODO websocket.io for constant results showing
   isEmailRequestLoading = false;
   hasClearWinner = false;
@@ -105,6 +112,7 @@ export default class EventResult extends Vue {
     if (this.email !== "") {
       this.isEmailRequestLoading = true;
       setTimeout(() => {
+        // TODO change event options to have email and change flag to true
         this.$buefy.toast.open({
           message: "We will send you an email when done!",
           type: "is-success",
@@ -123,35 +131,58 @@ export default class EventResult extends Vue {
         onConfirm: (value) => {
           this.email = value;
           this.setupEmail();
-        }
+        },
       });
     }
   }
 
+  changeVoters(choice: string) {
+    let voters: string[];
+    const data = {
+      answer: choice,
+    };
+    axios
+      .post(
+        "http://127.0.0.1:8000/events/" + this.$store.state.eventId + "/voters",
+        JSON.stringify(data)
+      )
+      .then((response) => {
+        voters = response.data;
+        this.data.forEach((item) => {
+          if (item.choice === choice) {
+            item.voters = voters;
+          }
+        });      
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   data = [
-    { choice: "pizza", count: 2, voters: ["mike", "anna"] },
-    { choice: "burger", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "sushi", count: 2, voters: ["mike", "anna"] },
-    { choice: "potatoes", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "cupcakes", count: 2, voters: ["mike", "anna"] },
-    { choice: "dougnuts", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "bananas", count: 2, voters: ["mike", "anna"] },
-    { choice: "apples", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "pasta", count: 2, voters: ["mike", "anna"] },
-    { choice: "spaghetti", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "steak", count: 2, voters: ["mike", "anna"] },
-    { choice: "ham", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "cold cuts", count: 2, voters: ["mike", "anna"] },
+    { choice: "pizza", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "burger", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "sushi", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "potatoes", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "cupcakes", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "dougnuts", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "bananas", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "apples", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "pasta", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "spaghetti", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "steak", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "ham", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "cold cuts", count: 2, voters: ["click here to load voters for this choice"] },
     {
       choice:
         "cook with best ingredients ever mate, it'd be so good!!!!!! indeeeed brother long text",
       count: 3,
-      voters: ["anon", "mike", "whe"],
+      voters: ["click here to load voters for this choice"],
     },
-    { choice: "subsandwich", count: 2, voters: ["mike", "anna"] },
-    { choice: "sandwich", count: 3, voters: ["anon", "mike", "whe"] },
-    { choice: "roll", count: 2, voters: ["mike", "anna"] },
-    { choice: "pita", count: 3, voters: ["anon", "mike", "whe"] },
+    { choice: "subsandwich", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "sandwich", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "roll", count: 2, voters: ["click here to load voters for this choice"] },
+    { choice: "pita", count: 3, voters: ["click here to load voters for this choice"] },
   ];
   columns = [
     {
@@ -170,8 +201,12 @@ export default class EventResult extends Vue {
   ];
 
   created() {
-    if (window.location.pathname.split("/")[2] === "result") {
+    // TODO send admin token and in the backend compare if same
+    // if different then check if everyone sees the results or not
+    const url = window.location.pathname.split("/");
+    if (url[2] === "result") {
       this.isUniqueUrl = true;
+      this.$store.commit("setEventId", url[3]);
     }
     if (Math.random() > 0.5) {
       this.isExpired = true;
@@ -179,6 +214,22 @@ export default class EventResult extends Vue {
     if (this.$store.state.email !== "") {
       this.email = this.$store.state.email;
     }
+    if (this.$store.state.question !== "") {
+      this.question = this.$store.state.question;
+    }
+    axios.get("http://127.0.0.1:8000/events/" + this.$store.state.eventId + "/result")
+      .then((response) => {
+        const data = response.data;
+        let _data;
+        this.data = [];
+        Object.keys(data).forEach((key) => {
+          _data = {"choice":key, "count": data[key], "voters": ["click here to load voters for this choice"]};
+          this.data.push(_data);
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
   // if live then show current results
   // otherwise show deadline

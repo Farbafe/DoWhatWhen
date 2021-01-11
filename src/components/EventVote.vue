@@ -57,6 +57,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import axios from "axios";
 
 @Component
 export default class EventVote extends Vue {
@@ -148,36 +149,45 @@ export default class EventVote extends Vue {
       );
     }
     this.isVoteLoading = true;
-    setTimeout(() => {
-      this.isVoteLoading = false;
-      this.isVoteDone = true;
-    }, 300);
+    const data = {
+      "votes": this.chosen,
+      "voter_username": "username_placeholder",
+      "voter_email": "email placeHOL><:DER!"
+    };
+    axios.post("http://127.0.0.1:8000/events/" + this.$route.params.id + "/vote", data)
+      .then((response) => {
+        console.log(response);
+        this.isVoteLoading = false;
+        this.isVoteDone = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   created() {
     if (this.isEventLoading) {
-      // send api request
-      setTimeout(() => {
-        this.isEventLoading = false;
-        this.votingMethod = "Ranked Voting";
-        this.canWriteCustom = true;
-        this.isVoterAnonymous = false;
-        this.isVoteChangeable = false;
-        this.voteDeadline = new Date("2022-1-2");
-        this.answers = ["pizza", "burger"];
-        this.question = "What do you want to eat?";
-        this.mustRankAll = true;
-
-        if (!this.isVoterAnonymous) {
-          console.log("you have to provide a username to vote ? ? or profile?");
-        }
-        if (this.voteDeadline < new Date()) {
-          this.isExpired = true;
-        }
-      }, 150);
+      axios.get("http://127.0.0.1:8000/events/" + this.$route.params.id)
+        .then((response) => {
+          const data = response.data;
+          this.isEventLoading = false;
+          this.votingMethod = data.voting_method;
+          this.canWriteCustom = data.can_write_custom;
+          this.isVoterAnonymous = data.is_voter_anonymous;
+          this.isVoteChangeable = data.is_vote_changeable;
+          this.voteDeadline = data.voting_deadline;
+          this.answers = data.answers;
+          this.question = data.question;
+          this.mustRankAll = data.must_rank_all;
+          if (this.voteDeadline! < new Date()) {
+            this.isExpired = true;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   }
-  // send id and get back event details then when loaded let user vote
 }
 </script>
 

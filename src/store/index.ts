@@ -7,8 +7,8 @@ export default new Vuex.Store({
   state: {
     eventId: "",
     question: "",
-    canWriteCustom: "No", // TODO turn this into a boolean, state manages yes/no to true/false
-    answers: "",
+    canWriteCustom: false, // TODO turn this into a boolean, state manages yes/no to true/false
+    answers: [],
     email: "",
   },
   mutations: {
@@ -19,7 +19,11 @@ export default new Vuex.Store({
       state.question = value;
     },
     setAnswers(state, value) {
-      state.canWriteCustom = value.canWriteCustom;
+      if (value.canWriteCustom === "Yes") {
+        state.canWriteCustom = true;
+      } else {
+        state.canWriteCustom = false;
+      }
       state.answers = value.answers;
     },
     setEmail(state, value) {
