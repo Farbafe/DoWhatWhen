@@ -1,21 +1,4 @@
 <template>
-  <div id="new-event">
-    <section>
-      <!-- <div class="block">
-        <b-field grouped group-multiline>
-          <b-field label="New or existing poll?">
-            <b-select v-model="isNewPoll" @change.native="changePoll">
-              <option
-                v-for="option in isNewPollOptions"
-                :value="option.value"
-                :key="option.text"
-              >
-                {{ option.text }}
-              </option>
-            </b-select>
-          </b-field>
-        </b-field>
-      </div> -->
       <b-steps
         v-model="activeStep"
         label-position="bottom"
@@ -48,8 +31,6 @@
           <event-result />
         </b-step-item>
       </b-steps>
-    </section>
-  </div>
 </template>
 
 <script lang="ts">
@@ -72,36 +53,14 @@ import EventResult from "@/components/EventResult.vue";
 export default class NewEvent extends Vue {
   question = "";
   activeStep = 0;
-  // isNewPoll = true;
-  // isNewPollOptions = [
-  //   { text: "New Poll", value: true },
-  //   { text: "Existing Poll", value: false },
-  // ];
-  // changePoll() {
-  //   if (this.isNewPoll) {
-  //     this.activeStep = 0;
-  //   } else {
-  //     if (this.$store.state.pollId != "0") {
-  //       this.$buefy.dialog.confirm({
-  //         title: "Switch Poll?",
-  //         message:
-  //           "Are you sure you want to <b>switch to</b> another poll? The existing poll can be revisited using the same ID: " +
-  //           this.$store.state.pollId,
-  //         confirmText: "Switch Poll",
-  //         cancelText: "Cancel",
-  //         type: "is-info",
-  //         hasIcon: true,
-  //         onCancel: () => {
-  //           return;
-  //         },
-  //       });
-  //     }
-  //     this.$store.commit("setPollId", "0");
-  //     this.activeStep = 2;
-  //   }
-  // }
+  isNewEvent = true;
+  isNewEventOptions = [
+    { text: "New Event", value: true },
+    { text: "Existing Event", value: false },
+  ];
   nextStep() {
     this.activeStep++;
+    // TODO make next item in focus
   }
 }
 </script>

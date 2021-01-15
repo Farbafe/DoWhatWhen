@@ -5,10 +5,15 @@
         {{ canWriteCustom }}
       </b-switch></b-field
     >
-    <div v-if="canWriteCustom === 'No'">
+    <div>
       Answers:
       <b-field>
-        <b-input v-model="answer" @keydown.enter.native.exact="add" @keydown.ctrl.enter.native.exact="done" ></b-input>
+        <b-input
+          v-model="answer"
+          @keydown.enter.native.exact="add"
+          @keydown.ctrl.enter.native.exact="done"
+          id="focuselement"
+        ></b-input>
         <b-button class="left-margin-small" @click="add">Add</b-button>
       </b-field>
       <div class="field">
@@ -74,6 +79,15 @@ export default class EventAnswers extends Vue {
       answers: this.answers,
     });
     this.$emit("done");
+  }
+  visible(elem: any) {
+    elem.focus();
+  }
+  mounted() {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const inViewport = require("in-viewport");
+    const elem = document.getElementById("focuselement");
+    inViewport(elem, this.visible);
   }
 }
 </script>

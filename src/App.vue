@@ -3,14 +3,14 @@
     <div id="nav" class="columns is-centered">
       <b-navbar class="column is-half">
         <template slot="brand">
-          <router-link to="/"
+          <router-link to="/" :key="$route.fullPath"
             ><img
               class="logo"
-              src="https://cdn.shopify.com/shopifycloud/hatchful-web/assets/6fcc76cfd1c59f44d43a485167fb3139.png" /></router-link
+              src="./assets/logo.png" /></router-link
         ></template>
         <template slot="start">
           <b-navbar-item>
-            <router-link to="/">Home</router-link>
+            <router-link to="/" :key="$route.fullPath">Home</router-link>
           </b-navbar-item>
           <b-navbar-item>
             <router-link to="/about">About</router-link>
@@ -18,10 +18,11 @@
         </template>
         <template slot="end">
           <b-navbar-item>
-            <router-link to="/">Github</router-link>
+            <a href="https://github.com/Farbafe/DoWhatWhen" target="_blank">Github</a>
           </b-navbar-item>
           <b-navbar-item>
-            <router-link to="/about">Login</router-link>
+            <router-link to="/">Login</router-link> 
+            <!-- TODO login? via google and facebook -->
           </b-navbar-item>
         </template>
       </b-navbar>

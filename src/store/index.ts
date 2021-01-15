@@ -28,7 +28,6 @@ export default new Vuex.Store({
     },
     setEmail(state, value) {
       state.email = value;
-    }
   },
   actions: {},
   modules: {}

@@ -1,6 +1,6 @@
 # DoWhatWhen - Decide what to do and when as a group!
 
-DoWhatWhen is a web-based group decision helper.
+DoWhatWhen is a web-based group decision helper. Backend available here: [DoWhatWhenBackend].
 
 ### Features
 
@@ -9,13 +9,23 @@ TODO Coming soon
 ### Tech
 
 DoWhatWhen uses: 
-* [Vue.js] for the frontend.
+* [Vue.js] for the frontend (using [Buefy]).
 * [FastAPI] for the backend (supported by [fastapi-socketio]).
 * [PostgreSQL] for the database (managed by [SQLAlchemy]).
 
+### Getting started
+
+1. Clone repo.
+2. Install dependencies.
+3. Build website.
+4. Serve dist folder.
+
 ### Usage
 
-TODO Coming soon
+1. Visit website.
+2. Create event and choose options.
+3. Share event url and vote.
+4. Check results when voting deadline is reached.
 
 ### Contribution
 
@@ -34,3 +44,5 @@ Copyright (c) [2021] [Yehya Eldeeb]
    [PostgreSQL]: <https://www.postgresql.org/>
    [SQLAlchemy]: <https://www.sqlalchemy.org/>
    [MIT License]: <https://opensource.org/licenses/MIT>
+   [DoWhatWhenBackend]: <https://github.com/Farbafe/DoWhatWhenBackend>
+   [Buefy]: <https://buefy.org/>

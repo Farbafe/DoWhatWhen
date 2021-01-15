@@ -31,6 +31,7 @@
           v-model="email"
           placeholder="email (optional)"
           @keydown.enter.native.exact="done"
+          id="focuselement"
       /></b-tooltip>
     </b-field>
     <b-collapse :open="false" position="is-bottom" aria-id="moreOptions">
@@ -84,7 +85,7 @@ import axios from "axios";
 @Component
 export default class EventOptions extends Vue {
   email = "";
-  voteDeadline = new Date();
+  voteDeadline = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
   voteMethod = "Single Vote";
   voteMethods = ["Single Vote", "Ranked Voting", "Multiple Votes"];
   isVoterAnonymous = true;
@@ -128,6 +129,15 @@ export default class EventOptions extends Vue {
       }).catch((error) => {
         console.log(error);
       });
+  }
+  visible(elem: any) {
+    elem.focus();    
+  }
+  mounted() {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const inViewport = require("in-viewport");
+    const elem = document.getElementById("focuselement");
+    inViewport(elem, this.visible);
   }
 }
 </script>
