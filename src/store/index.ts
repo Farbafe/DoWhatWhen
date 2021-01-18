@@ -1,5 +1,5 @@
 import Vue from "vue";
-import Vuex, {Store} from "vuex";
+import Vuex, { Store } from "vuex";
 
 Vue.use(Vuex);
 
@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     eventId: "",
     question: "",
-    canWriteCustom: false, // TODO turn this into a boolean, state manages yes/no to true/false
+    canWriteCustom: false,
     answers: [],
     email: "",
   },
@@ -28,6 +28,7 @@ export default new Vuex.Store({
     },
     setEmail(state, value) {
       state.email = value;
+    },
   },
   actions: {},
   modules: {}
