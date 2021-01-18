@@ -2,15 +2,6 @@
   <div class="has-text-centered">
     <div class="share-network-list">
       <ShareNetwork
-        network="email"
-        :url="sharing.url"
-        :title="sharing.title"
-        :description="sharing.description"
-      >
-        <i><font-awesome-icon icon="envelope"></font-awesome-icon></i>
-        <span>Email</span>
-      </ShareNetwork>
-      <ShareNetwork
         v-for="network in networks"
         :network="network.network"
         :key="network.network"
@@ -19,15 +10,11 @@
         :title="sharing.title"
         :description="sharing.description"
       >
-        <i
-          ><font-awesome-icon
-            :icon="{ prefix: 'fab', iconName: network.icon }"
-          ></font-awesome-icon
-        ></i>
+        <i><b-icon :icon="network.icon"></b-icon></i>
         <span>{{ network.name }}</span>
       </ShareNetwork>
       <div class="imitate-share-network" @click="copy">
-        <i><font-awesome-icon icon="clipboard"></font-awesome-icon></i>
+        <i><b-icon icon="clipboard-outline"></b-icon></i>
         <span> Copy to Clipboard </span>
       </div>
     </div>
@@ -47,6 +34,11 @@ export default class ShareEvent extends Vue {
   };
   networks = [
     {
+      network: "email",
+      name: "Email",
+      icon: "email"
+    },
+    {
       network: "facebook",
       name: "Facebook",
       icon: "facebook",
@@ -55,13 +47,13 @@ export default class ShareEvent extends Vue {
     {
       network: "reddit",
       name: "Reddit",
-      icon: "reddit-alien",
+      icon: "reddit",
       color: "#ff4500",
     },
     {
       network: "telegram",
       name: "Telegram",
-      icon: "telegram-plane",
+      icon: "telegram",
       color: "#0088cc",
     },
     {
