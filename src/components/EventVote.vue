@@ -61,7 +61,7 @@ import axios from "axios";
 
 @Component
 export default class EventVote extends Vue {
-  resultUrl = "/event/result/" + this.$route.params.id;
+  resultUrl = "/event/" + this.$route.params.id + '/result';
   votingMethod = "";
   canWriteCustom = false;
   isVoterAnonymous = true; // if some1 has an account, do they choose to vote as non-anon even if not required?
@@ -154,7 +154,7 @@ export default class EventVote extends Vue {
       "voter_username": "username_placeholder",
       "voter_email": "email placeHOL><:DER!"
     };
-    axios.post("http://127.0.0.1:8000/events/" + this.$route.params.id + "/vote", data)
+    axios.post("http://127.0.0.1:8000/event/" + this.$route.params.id + "/vote", data)
       .then((response) => {
         console.log(response);
         this.isVoteLoading = false;
@@ -167,7 +167,7 @@ export default class EventVote extends Vue {
 
   created() {
     if (this.isEventLoading) {
-      axios.get("http://127.0.0.1:8000/events/" + this.$route.params.id)
+      axios.get("http://127.0.0.1:8000/event/" + this.$route.params.id)
         .then((response) => {
           const data = response.data;
           this.isEventLoading = false;

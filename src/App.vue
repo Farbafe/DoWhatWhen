@@ -1,32 +1,53 @@
 <template>
   <div id="app">
-    <div id="nav" class="columns is-centered">
-      <b-navbar class="column is-half">
-        <template slot="brand">
-          <router-link to="/" :key="$route.fullPath"
-            ><img
-              class="logo"
-              src="./assets/logo.png" /></router-link
-        ></template>
-        <template slot="start">
-          <b-navbar-item>
-            <router-link to="/" :key="$route.fullPath">Home</router-link>
-          </b-navbar-item>
-          <b-navbar-item>
-            <router-link to="/about">About</router-link>
-          </b-navbar-item>
-        </template>
-        <template slot="end">
-          <b-navbar-item>
-            <a href="https://github.com/Farbafe/DoWhatWhen" target="_blank">Github</a>
-          </b-navbar-item>
-          <b-navbar-item>
-            <router-link to="/">Login</router-link> 
-            <!-- TODO login? via google and facebook -->
-          </b-navbar-item>
-        </template>
-      </b-navbar>
-    </div>
+    <section class="hero is-primary is-medium mb-2">
+      <div class="hero-head">
+        <nav class="navbar">
+          <div class="container">
+            <div class="navbar-menu">
+              <div class="navbar-brand">
+                <router-link to="/" :key="$route.fullPath" class="navbar-item"
+                  ><img src="./assets/logo.png"
+                /></router-link>
+              </div>
+              <div class="navbar-end">
+                <span class="navbar-item">
+                  <a
+                    href="https://github.com/Farbafe/DoWhatWhen"
+                    target="_blank"
+                    class="button is-primary is-inverted"
+                  >
+                    <b-icon icon="github"></b-icon>
+                    <span>Github</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title">DoWhatWhen</h1>
+          <h2 class="subtitle">
+            Never spend another minute arguing what to eat.
+          </h2>
+        </div>
+      </div>
+      <!-- <div class="hero-foot">
+        <nav class="tabs is-fullwidth">
+          <div class="container pb-2">
+            <ul>
+              <li class="is-active">
+                <a>We decided on what we want, but not when!</a>
+              </li>
+              <li><a>We know when but not what!</a></li>
+              <li><a>We don't know anything!!!</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div> -->
+    </section>
     <router-view />
   </div>
 </template>
@@ -67,8 +88,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.logo {
-  width: 25%;
-}
-</style>
+<style scoped></style>

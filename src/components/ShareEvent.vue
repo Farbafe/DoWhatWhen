@@ -28,9 +28,9 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component
 export default class ShareEvent extends Vue {
   sharing = {
-    url: window.location.origin + "/event/vote/" + this.$store.state.eventId,
-    title: "DoWhatWhen:" + this.$store.state.question,
-    description: "Choose what you want to do as a group!",
+    url: "",
+    title: "",
+    description: "",
   };
   networks = [
     {
@@ -91,7 +91,7 @@ export default class ShareEvent extends Vue {
   }
   created() {
     this.sharing = {
-      url: window.location.origin + "/event/vote/" + this.$store.state.eventId,
+      url: window.location.origin + "/event/" + this.$store.state.eventId + "/vote",
       title: "DoWhatWhen:" + this.$store.state.question,
       description: "Choose what you want to do as a group!",
     };

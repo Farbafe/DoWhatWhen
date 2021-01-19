@@ -6,7 +6,7 @@
     >
       <p v-if="!isUniqueUrl">
         Result can be viewed at this
-        <router-link :to="'/event/result/' + this.$store.state.eventId"
+        <router-link :to="'/event/' + this.$store.state.eventId + '/result'"
           >link</router-link
         >.<br />
       </p>
@@ -143,7 +143,7 @@ export default class EventResult extends Vue {
     };
     axios
       .post(
-        "http://127.0.0.1:8000/events/" + this.$store.state.eventId + "/voters",
+        "http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/voters",
         JSON.stringify(data)
       )
       .then((response) => {
@@ -204,7 +204,7 @@ export default class EventResult extends Vue {
     // TODO send admin token and in the backend compare if same
     // if different then check if everyone sees the results or not
     const url = window.location.pathname.split("/");
-    if (url[2] === "result") {
+    if (url[3] === "result") {
       this.isUniqueUrl = true;
       this.$store.commit("setEventId", url[3]);
     }
@@ -217,7 +217,7 @@ export default class EventResult extends Vue {
     if (this.$store.state.question !== "") {
       this.question = this.$store.state.question;
     }
-    axios.get("http://127.0.0.1:8000/events/" + this.$store.state.eventId + "/result")
+    axios.get("http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/result")
       .then((response) => {
         const data = response.data;
         let _data;
