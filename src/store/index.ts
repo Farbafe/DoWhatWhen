@@ -8,6 +8,8 @@ export default new Vuex.Store({
     eventId: "",
     question: "",
     canWriteCustom: false,
+    isCustomAnswersAdded: false,
+    isVoteWhen: true,
     answers: [],
     email: "",
   },
@@ -19,11 +21,9 @@ export default new Vuex.Store({
       state.question = value;
     },
     setAnswers(state, value) {
-      if (value.canWriteCustom === "Yes") {
-        state.canWriteCustom = true;
-      } else {
-        state.canWriteCustom = false;
-      }
+      state.canWriteCustom = value.canWriteCustom;
+      state.isCustomAnswersAdded = value.isCustomAnswersAdded;
+      state.isVoteWhen = value.isVoteWhen;
       state.answers = value.answers;
     },
     setEmail(state, value) {

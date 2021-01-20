@@ -1,6 +1,14 @@
 <template>
   <div>
-    <b-input @keydown.enter.native.exact="done" v-model="question" ref="question"></b-input><br />
+    <b-field :type="{ 'is-danger': isDanger }" :message="message">
+      <b-input
+        @keydown.enter.native.exact="done"
+        v-model="question"
+        ref="question"
+        @input="inputChanged"
+      ></b-input>
+    </b-field>
+    <br />
     <b-field class="has-text-centered">
       <b-button class="is-primary" rounded @click="done">Ask</b-button></b-field
     >
@@ -13,12 +21,21 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component
 export default class EventQuestion extends Vue {
   question = "";
+  isDanger = false;
+  message = "";
+  inputChanged() {
+    if (!this.question) {
+      this.isDanger = false;
+      this.message = "";
+    } else {
+      this.isDanger = true;
+      this.message = "Please enter a question first.";
+    }
+  }
   done() {
     if (!this.question) {
-      this.$buefy.toast.open({
-        message: "Please write a question!",
-        type: "is-danger",
-      });
+      this.isDanger = true;
+      this.message = "Please enter a question first.";
       return;
     }
     this.$store.commit("setQuestion", this.question);

@@ -68,7 +68,7 @@ Vue.use(Buefy);
 export default {
   metaInfo() {
     return {
-      title: "DoWhatWhen",
+      title: "DoWhatWhen - Decide what to do and when as a group",
       meta: [
         {
           name: "description",

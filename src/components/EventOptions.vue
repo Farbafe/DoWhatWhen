@@ -55,10 +55,6 @@
         <b-checkbox v-model="isResultPublic">
           Everyone can see the result.</b-checkbox
         ><br />
-        <b-checkbox v-model="isCustomAnswersAdded">
-          User-provided answers are added to the choices of following
-          users.</b-checkbox
-        ><br />
         <b-checkbox v-model="willEmailAdmin">
           Send me an email when voting deadline is reached.</b-checkbox
         >
@@ -93,9 +89,8 @@ export default class EventOptions extends Vue {
   isResultLive = true;
   mustRankAll = false;
   isResultPublic = false;
-  isCustomAnswersAdded = false;
   isLoading = false;
-  willEmailAdmin = true; 
+  willEmailAdmin = true;
 
   done() {
     this.isLoading = true;
@@ -114,10 +109,11 @@ export default class EventOptions extends Vue {
         "is_vote_changeable": this.isVoteChangeable,
         "is_result_live": this.isResultLive,
         "must_rank_all": this.mustRankAll,
-        "is_custom_answers_added": this.isCustomAnswersAdded,
+        "is_custom_answers_added": this.$store.state.isCustomAnswersAdded,
         "will_email_admin": this.willEmailAdmin,
         "voting_method": this.voteMethod,
-        "voting_deadline": this.voteDeadline
+        "voting_deadline": this.voteDeadline,
+        "is_vote_when": this.$store.state.isVoteWhen // TODO get all store items and unpack once
       },
       "answers": this.$store.state.answers
     };

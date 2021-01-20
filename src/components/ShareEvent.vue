@@ -18,6 +18,19 @@
         <span> Copy to Clipboard </span>
       </div>
     </div>
+    <div class="columns is-centered">
+      <div class="column is-half">
+        <b-notification
+          v-if="copyNotification"
+          :type="copyNotificationType"
+          has-icon
+          aria-close-label="Close notification"
+          role="alert"
+        >
+          {{ copyMessage }}
+        </b-notification>
+      </div>
+    </div>
     <b-button rounded class="is-primary" @click="done">Done</b-button>
   </div>
 </template>
@@ -27,6 +40,9 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
 export default class ShareEvent extends Vue {
+  copyNotification = false;
+  copyMessage = "";
+  copyNotificationType = "";
   sharing = {
     url: "",
     title: "",
@@ -36,7 +52,7 @@ export default class ShareEvent extends Vue {
     {
       network: "email",
       name: "Email",
-      icon: "email"
+      icon: "email",
     },
     {
       network: "facebook",
@@ -70,18 +86,17 @@ export default class ShareEvent extends Vue {
     },
   ];
   copy() {
+    this.copyNotification = false;
     this.$copyText(this.sharing.url).then(
       () => {
-        this.$buefy.toast.open({
-          message: "Copied URL to clipboard!",
-          type: "is-success",
-        });
+        this.copyNotification = true;
+        this.copyMessage = "Successfully copied to clipboard.";
+        this.copyNotificationType = "is-success";
       },
       (e) => {
-        this.$buefy.toast.open({
-          message: "Could NOT copy URL to clipboard!",
-          type: "is-danger",
-        });
+        this.copyNotification = true;
+        this.copyMessage = "Failed to copy to clipboard.";
+        this.copyNotificationType = "is-danger";
         console.log(e);
       }
     );
@@ -91,7 +106,11 @@ export default class ShareEvent extends Vue {
   }
   created() {
     this.sharing = {
-      url: window.location.origin + "/event/" + this.$store.state.eventId + "/vote",
+      url:
+        window.location.origin +
+        "/event/" +
+        this.$store.state.eventId +
+        "/vote",
       title: "DoWhatWhen:" + this.$store.state.question,
       description: "Choose what you want to do as a group!",
     };
@@ -153,9 +172,5 @@ a[class^="share-network-"] i {
   background-color: rgba(0, 0, 0, 0.15);
   padding: 10px;
   flex: 0 1 auto;
-}
-
-button {
-  margin-left: 1em;
 }
 </style>

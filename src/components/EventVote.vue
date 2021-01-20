@@ -4,7 +4,8 @@
       The event's question is <b>{{ question }}</b> Please vote for your choice
       on the right!<br />
       <p v-if="isExpired">
-        This event's voting deadline has passed! You can view the result at this <router-link :to="resultUrl">link.</router-link>
+        This event's voting deadline has passed! You can view the result at this
+        <router-link :to="resultUrl">link.</router-link>
       </p>
       <p v-if="canWriteCustom">
         This event allows you to vote for a choice you write!<br /><br />
@@ -22,32 +23,52 @@
     </div>
     <div class="column is-half" v-if="!isExpired">
       <fieldset :disabled="isVoteDone">
-      <div class="field">
-        <b-tag
-          v-for="answer in answers"
-          :key="answer"
-          :type="chosen.includes(answer) ? 'is-success' : ''"
-          rounded
-          size="is-medium"
-          ><div :class="{'is-clickable': !isVoteDone, 'is-not-allowed': isVoteDone}" @click="toggleAnswer(answer)">
-            {{ answer }}
-          </div></b-tag
-        >
-      </div>
-      <b-input
-        v-if="canWriteCustom"
-        v-model="custom"
-        placeholder="you can write your custom answer here"
-        @input="customInput"
-      ></b-input>
-      <div class="has-text-centered">
-        <b-button
-          class="is-primary top-margin-tiny"
-          :class="{ 'is-loading': isVoteLoading }"
-          @click="vote"
-          >Vote</b-button
-        >
-      </div>
+        <div class="field">
+          <b-tag
+            v-for="answer in answers"
+            :key="answer"
+            :type="chosen.includes(answer) ? 'is-success' : ''"
+            rounded
+            class="p-1 mr-3"
+            size="is-medium"
+            ><div
+              :class="{
+                'is-clickable': !isVoteDone,
+                'is-not-allowed': isVoteDone,
+              }"
+              @click="toggleAnswer(answer)"
+            >
+              {{ answer }}
+            </div></b-tag
+          >
+        </div>
+        <b-input
+          v-if="canWriteCustom"
+          v-model="custom"
+          placeholder="you can write your custom answer here"
+          @input="customInput"
+        ></b-input>
+        <div class="columns is-centered">
+          <div class="column is-half">
+            <b-notification
+              v-if="voteNotification"
+              :type="voteNotificationType"
+              has-icon
+              aria-close-label="Close notification"
+              role="alert"
+            >
+              {{ voteMessage }}
+            </b-notification>
+          </div>
+        </div>
+        <div class="has-text-centered">
+          <b-button
+            class="is-primary mt-4"
+            :class="{ 'is-loading': isVoteLoading }"
+            @click="vote"
+            >Vote</b-button
+          >
+        </div>
       </fieldset>
     </div>
     <!-- the id of this event is: {{ this.$route.params.id }}
@@ -61,7 +82,7 @@ import axios from "axios";
 
 @Component
 export default class EventVote extends Vue {
-  resultUrl = "/event/" + this.$route.params.id + '/result';
+  resultUrl = "/event/" + this.$route.params.id + "/result";
   votingMethod = "";
   canWriteCustom = false;
   isVoterAnonymous = true; // if some1 has an account, do they choose to vote as non-anon even if not required?
@@ -76,6 +97,9 @@ export default class EventVote extends Vue {
   custom = "";
   isExpired = false;
   isVoteDone = false;
+  voteNotification = false;
+  voteNotificationType = "";
+  voteMessage = "";
 
   customInput() {
     const index = this.chosen.indexOf("__CUSTOM__VOTING__INPUT");
@@ -111,22 +135,23 @@ export default class EventVote extends Vue {
   }
 
   vote() {
+    this.voteNotification = false;
     if (
       this.chosen.length === 0 ||
       (this.chosen.length === 1 && this.chosen[0] === "")
     ) {
-      this.$buefy.toast.open({
-        message: "Please provide at least 1 choice before voting!",
-        type: "is-danger",
-      });
+      this.voteMessage = "Please provide at least 1 choice before voting.";
+      this.voteNotificationType = "is-danger";
+      this.voteNotification = true;
       return;
     }
     if (this.votingMethod === "Ranked Voting" && this.mustRankAll) {
       const didRankAll = this.answers.every((val) => this.chosen.includes(val));
       if (!didRankAll) {
-        this.$buefy.dialog.alert({"message":
-          "This event requires that you rank all of the available choices.", "type": "is-danger"}
-        );
+        this.voteMessage =
+          "This event requires that you rank all of the available choices.";
+        this.voteNotificationType = "is-danger";
+        this.voteNotification = true;
         return;
       }
     }
@@ -145,29 +170,40 @@ export default class EventVote extends Vue {
       this.votingMethod === "Ranked Voting"
     ) {
       this.$buefy.dialog.alert(
-        "You have added your own choice to a rakned voting event. The rank of your custom choice is dependant on the order you wrote your custom choice."
+        "You have added your own choice to a ranked choice voting event. The rank of your custom choice is dependant on the order you wrote your custom choice."
       );
     }
     this.isVoteLoading = true;
     const data = {
       "votes": this.chosen,
       "voter_username": "username_placeholder",
-      "voter_email": "email placeHOL><:DER!"
+      "voter_email": "email placeHOL><:DER!",
     };
-    axios.post("http://127.0.0.1:8000/event/" + this.$route.params.id + "/vote", data)
+    axios
+      .post(
+        "http://127.0.0.1:8000/event/" + this.$route.params.id + "/vote",
+        data
+      )
       .then((response) => {
         console.log(response);
         this.isVoteLoading = false;
         this.isVoteDone = true;
+        this.voteMessage = "Successfully submitted your vote.";
+        this.voteNotificationType = "is-success";
+        this.voteNotification = true;
       })
       .catch((error) => {
+        this.voteMessage = "Failed to submit your vote.";
+        this.voteNotificationType = "is-danger";
+        this.voteNotification = true;
         console.log(error);
       });
   }
 
   created() {
     if (this.isEventLoading) {
-      axios.get("http://127.0.0.1:8000/event/" + this.$route.params.id)
+      axios
+        .get("http://127.0.0.1:8000/event/" + this.$route.params.id)
         .then((response) => {
           const data = response.data;
           this.isEventLoading = false;
@@ -194,12 +230,5 @@ export default class EventVote extends Vue {
 <style scoped>
 .is-not-allowed {
   cursor: not-allowed;
-}
-.top-margin-tiny {
-  margin-top: 0.3em;
-}
-.tag {
-  padding: 1em;
-  margin-right: 1em;
 }
 </style>

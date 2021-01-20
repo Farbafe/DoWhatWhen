@@ -76,6 +76,7 @@
             <b-tag
               v-for="voter in props.row.voters"
               :key="voter"
+              class="p-1 mr-3"
               ><div @click="changeVoters(props.row.choice)" class="is-clickable">{{ voter }}</div></b-tag
             >
           </div>
@@ -107,17 +108,22 @@ export default class EventResult extends Vue {
   willEmail = false;
   winners = ["burger", "NOTburger"];
   email = "";
+  emailNotification = false;
+  emailMessage = "";
+  emailMessageType = "";
 
   setupEmail() {
     if (this.email !== "") {
       this.isEmailRequestLoading = true;
       setTimeout(() => {
         // TODO change event options to have email and change flag to true
-        this.$buefy.toast.open({
-          message: "We will send you an email when done!",
-          type: "is-success",
-        });
+        this.emailNotification = true;
+        this.emailMessage = "We will send you an email when voting is over.";
+        this.emailMessageType = "is-success";
         this.willEmail = true;
+        this.emailNotification = true;
+        this.emailMessage = "Failed to send email when voting is over.";
+        this.emailMessageType = "is-danger";
         this.isEmailRequestLoading = false;
       }, 500);
     } else {
@@ -237,9 +243,4 @@ export default class EventResult extends Vue {
 }
 </script>
 
-<style scoped>
-.tag {
-  padding: 0.5em;
-  margin-right: 0.4em;
-}
-</style>
+<style scoped></style>

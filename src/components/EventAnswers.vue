@@ -1,25 +1,32 @@
 <template>
   <div>
-    <b-field label="Let users write their own answers?">
-      <b-switch v-model="canWriteCustom" true-value="Yes" false-value="No">
-        {{ canWriteCustom }}
-      </b-switch></b-field
+    <b-checkbox v-model="canWriteCustom"
+      >Voters can write their own answers.</b-checkbox
+    >
+    <b-checkbox v-model="isCustomAnswersAdded" :disabled="!canWriteCustom">
+      Voter-provided answers are added to the choices of following
+      voters.</b-checkbox
+    >
+    <b-checkbox v-model="isVoteWhen">
+      Voters must choose a time for their answers.</b-checkbox
     >
     <div>
       Answers:
-      <b-field>
+      <b-field :message="message" :type="{ 'is-danger': isDanger }">
         <b-input
           v-model="answer"
           @keydown.enter.native.exact="add"
           @keydown.ctrl.enter.native.exact="done"
+          @change="inputChange"
           id="focuselement"
         ></b-input>
-        <b-button class="left-margin-small" @click="add">Add</b-button>
+        <b-button class="ml-4" @click="add">Add</b-button>
       </b-field>
       <div class="field">
         <b-tag
           v-for="answer in answers"
           :key="answer"
+          class="mr-3"
           close-type="is-danger"
           closable
           close-icon="delete"
@@ -30,7 +37,7 @@
         >
       </div>
     </div>
-    <b-field class="has-text-centered top-margin-tiny">
+    <b-field class="has-text-centered mt-3">
       <b-button class="is-primary" rounded @click="done"
         >Save</b-button
       ></b-field
@@ -43,39 +50,45 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
 export default class EventAnswers extends Vue {
-  canWriteCustom = "No";
+  canWriteCustom = false;
+  isCustomAnswersAdded = false;
+  isVoteWhen = true;
   answers: string[] = [];
   answer = "";
+  message = "";
+  isDanger = false;
   remove(str: string) {
     this.answers = this.answers.filter((e) => e !== str);
   }
-  add() {
+  inputChange() {
     if (!this.answer) {
-      this.$buefy.toast.open({
-        message: "Please write an answer!",
-        type: "is-danger",
-      });
+      this.isDanger = true;
+      this.message = "Please write an answer first.";
+      return 1;
+    } else if (this.answers.indexOf(this.answer) !== -1) {
+      this.isDanger = true;
+      this.message = "This answer is already added.";
+      return 1;
+    }
+  }
+  add() {
+    if (this.inputChange() === 1) {
       return;
     }
-    this.answers.indexOf(this.answer) === -1
-      ? this.answers.push(this.answer)
-      : this.$buefy.toast.open({
-          message: "Answer already added!",
-          type: "is-danger",
-        });
+    this.answers.push(this.answer);
     this.answer = "";
   }
   done() {
-    if (this.canWriteCustom === "No" && this.answers.length < 2) {
-      this.$buefy.toast.open({
-        message:
-          "Please provide at least 2 choices or let users write their own!",
-        type: "is-danger",
-      });
+    if (this.canWriteCustom === false && this.answers.length < 2) {
+      this.isDanger = true;
+      this.message =
+        "Please provide at least 2 answers or let voters write their own.";
       return;
     }
     this.$store.commit("setAnswers", {
       canWriteCustom: this.canWriteCustom,
+      isCustomAnswersAdded: this.isCustomAnswersAdded,
+      isVoteWhen: this.isVoteWhen,
       answers: this.answers,
     });
     this.$emit("done");
@@ -92,14 +105,4 @@ export default class EventAnswers extends Vue {
 }
 </script>
 
-<style scoped>
-.top-margin-tiny {
-  margin-top: 0.3em;
-}
-.left-margin-small {
-  margin-left: 1em;
-}
-.tag {
-  margin-right: 1em;
-}
-</style>
+<style scoped></style>
