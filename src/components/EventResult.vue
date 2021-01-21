@@ -107,7 +107,7 @@ export default class EventResult extends Vue {
   isResultLive = true;
   willEmail = false;
   winners = ["burger", "NOTburger"];
-  email = "";
+  email = ""; // TODO sould get email from server, by using a POST on the usual GET url and providing admin token, backend checks if same and returns different return type
   emailNotification = false;
   emailMessage = "";
   emailMessageType = "";
@@ -115,17 +115,22 @@ export default class EventResult extends Vue {
   setupEmail() {
     if (this.email !== "") {
       this.isEmailRequestLoading = true;
-      setTimeout(() => {
-        // TODO change event options to have email and change flag to true
+      axios.patch("http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/admin" , JSON.stringify({
+        "admin_email": this.email,
+        "will_email_admin": true,
+      })).then(() => {
         this.emailNotification = true;
         this.emailMessage = "We will send you an email when voting is over.";
         this.emailMessageType = "is-success";
         this.willEmail = true;
+        this.isEmailRequestLoading = false;
+      }).catch((e) => {
         this.emailNotification = true;
-        this.emailMessage = "Failed to send email when voting is over.";
+        this.emailMessage = "Failed to send email reminder when voting is over.";
         this.emailMessageType = "is-danger";
         this.isEmailRequestLoading = false;
-      }, 500);
+        console.log(e);
+      });
     } else {
       this.$buefy.dialog.prompt({
         message: "Enter your email address",
@@ -144,13 +149,11 @@ export default class EventResult extends Vue {
 
   changeVoters(choice: string) {
     let voters: string[];
-    const data = {
-      answer: choice,
-    };
+    const data = choice;
     axios
       .post(
         "http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/voters",
-        JSON.stringify(data)
+        data
       )
       .then((response) => {
         voters = response.data;
@@ -212,7 +215,7 @@ export default class EventResult extends Vue {
     const url = window.location.pathname.split("/");
     if (url[3] === "result") {
       this.isUniqueUrl = true;
-      this.$store.commit("setEventId", url[3]);
+      this.$store.commit("setEventId", url[2]);
     }
     if (Math.random() > 0.5) {
       this.isExpired = true;

@@ -17,7 +17,7 @@
           v-model="answer"
           @keydown.enter.native.exact="add"
           @keydown.ctrl.enter.native.exact="done"
-          @change="inputChange"
+          @input="inputChanged(false)"
           id="focuselement"
         ></b-input>
         <b-button class="ml-4" @click="add">Add</b-button>
@@ -60,8 +60,8 @@ export default class EventAnswers extends Vue {
   remove(str: string) {
     this.answers = this.answers.filter((e) => e !== str);
   }
-  inputChange() {
-    if (!this.answer) {
+  inputChanged(adding: boolean) {
+    if (!this.answer && adding) {
       this.isDanger = true;
       this.message = "Please write an answer first.";
       return 1;
@@ -70,9 +70,11 @@ export default class EventAnswers extends Vue {
       this.message = "This answer is already added.";
       return 1;
     }
+    this.isDanger = false;
+    this.message = "";
   }
   add() {
-    if (this.inputChange() === 1) {
+    if (this.inputChanged(true) === 1) {
       return;
     }
     this.answers.push(this.answer);

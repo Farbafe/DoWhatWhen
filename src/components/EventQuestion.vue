@@ -24,18 +24,17 @@ export default class EventQuestion extends Vue {
   isDanger = false;
   message = "";
   inputChanged() {
-    if (!this.question) {
+    if (this.question) {
       this.isDanger = false;
       this.message = "";
     } else {
       this.isDanger = true;
       this.message = "Please enter a question first.";
+      return 1;
     }
   }
   done() {
-    if (!this.question) {
-      this.isDanger = true;
-      this.message = "Please enter a question first.";
+    if (this.inputChanged() === 1) {
       return;
     }
     this.$store.commit("setQuestion", this.question);
