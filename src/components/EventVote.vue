@@ -70,6 +70,8 @@
           >
         </div>
       </fieldset>
+    <br />
+    <date-picker inline show-helper-buttons switch-button-label="Whole days?" :helper-buttons="helperButtons" :disabled-dates="disabledDates" :initial-dates="initialDates"></date-picker>
     </div>
     <!-- the id of this event is: {{ this.$route.params.id }}
     {{ votingMethod }} {{ canWriteCustom }} -->
@@ -79,8 +81,14 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
+import DatePicker from "vue-time-date-range-picker/dist/vdprDatePicker";
+import moment from "moment";
 
-@Component
+@Component({
+  components: {
+    DatePicker,
+  },
+})
 export default class EventVote extends Vue {
   resultUrl = "/event/" + this.$route.params.id + "/result";
   votingMethod = "";
@@ -100,6 +108,34 @@ export default class EventVote extends Vue {
   voteNotification = false;
   voteNotificationType = "";
   voteMessage = "";
+  helperButtons = [
+    {
+      "name": "Today",
+      "from": moment(),
+      "to": moment()
+    },
+    {
+      "name": "Tomorrow",
+      "from": moment().add(1, "days"),
+      "to": moment().add(1, "days")
+    },
+    {
+      "name": "End of Week",
+      "from": moment(),
+      "to": moment().endOf('week')
+    },
+    {
+      "name": "End of Month",
+      "from": moment(),
+      "to": moment().endOf('month')
+    }
+  ];
+  disabledDates = {
+    custom(date: any) {
+      return moment(date).isBefore(moment().subtract(1, "days"));
+    }
+  };
+  initialDates = [moment(), moment().add(1, "days")];
 
   customInput() {
     const index = this.chosen.indexOf("__CUSTOM__VOTING__INPUT");

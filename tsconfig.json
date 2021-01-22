@@ -28,6 +28,7 @@
     ]
   },
   "include": [
+    "src/types/vue-time-date-range-picker/index.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
