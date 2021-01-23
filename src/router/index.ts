@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import EventVote from "../components/EventVote.vue";
 import EventResult from "../components/EventResult.vue";
+import NotFound from "../components/NotFound.vue";
 
 Vue.use(VueRouter);
 
@@ -21,6 +22,10 @@ const routes: Array<RouteConfig> = [
     path: "/event/:id/result",
     name: "EventResult",
     component: EventResult
+  },
+  {
+    path: "*",
+    component: NotFound
   }
 ];
 
