@@ -111,23 +111,43 @@ export default class EventVote extends Vue {
   helperButtons = [
     {
       "name": "Today",
-      "from": moment(),
-      "to": moment()
+      "from": moment().toDate(),
+      "to": moment().endOf('day').toDate()
     },
     {
       "name": "Tomorrow",
-      "from": moment().add(1, "days"),
-      "to": moment().add(1, "days")
+      "from": moment().add(1, "days").startOf('day').toDate(),
+      "to": moment().add(1, "days").endOf('day').toDate()
+    },
+    {
+      "name": "48 Hours",
+      "from": moment().toDate(),
+      "to": moment().add(48, "hours").toDate()
+    },
+    {
+      "name": "Weekend",
+      "from": moment().weekday(5).toDate(),
+      "to": moment().weekday(6).endOf('day').toDate()
     },
     {
       "name": "End of Week",
-      "from": moment(),
-      "to": moment().endOf('week')
+      "from": moment().toDate(),
+      "to": moment().endOf('week').endOf('day').toDate()
     },
     {
       "name": "End of Month",
-      "from": moment(),
-      "to": moment().endOf('month')
+      "from": moment().toDate(),
+      "to": moment().endOf('month').endOf('day').toDate()
+    },
+    {
+      "name": "One Week",
+      "from": moment().toDate(),
+      "to": moment().add(1, "week").toDate()
+    },
+    {
+      "name": "One Month",
+      "from": moment().toDate(),
+      "to": moment().add(1, "month").toDate()
     }
   ];
   disabledDates = {
@@ -135,7 +155,7 @@ export default class EventVote extends Vue {
       return moment(date).isBefore(moment().subtract(1, "days"));
     }
   };
-  initialDates = [moment(), moment().add(1, "days")];
+  initialDates = [moment().toDate(), moment().add(1, "days").toDate()];
 
   customInput() {
     const index = this.chosen.indexOf("__CUSTOM__VOTING__INPUT");
