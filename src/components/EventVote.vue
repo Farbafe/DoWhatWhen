@@ -1,47 +1,70 @@
 <template>
-  <div class="columns is-centered">
-    <div class="column is-one-third">
+  <div class="columns is-multiline">
+    <div class="column is-half is-offset-one-quarter has-text-centered">
       The event's question is <b>{{ question }}</b> Please vote for your choice
       on the right!<br />
       <p v-if="isExpired">
         This event's voting deadline has passed! You can view the result at this
         <router-link :to="resultUrl">link.</router-link>
       </p>
-      <p v-if="canWriteCustom">
-        This event allows you to vote for a choice you write!<br /><br />
-      </p>
-      <p v-if="votingMethod === 'Single Vote'">
-        You can only vote for 1 choice.
-      </p>
-      <p v-else-if="votingMethod === 'Multiple Votes'">
-        You can vote for as many choices as you want.
-      </p>
-      <p v-else>
-        You can vote for as many choices as you want. You can rank your votes by
-        clicking them in the order you like!
-      </p>
+      <div v-else>
+        <p v-if="canWriteCustom">
+          This event allows you to vote for a choice you write!<br /><br />
+        </p>
+        <p v-if="votingMethod === 'Single Vote'">
+          You can only vote for 1 choice.
+        </p>
+        <p v-else-if="votingMethod === 'Multiple Votes'">
+          You can vote for as many choices as you want.
+        </p>
+        <p v-else>
+          You can vote for as many choices as you want. You can rank your votes
+          by clicking them in the order you like!
+        </p>
+      </div>
     </div>
-    <div class="column is-half" v-if="!isExpired">
-      <fieldset :disabled="isVoteDone">
-        <div class="field">
-          <b-tag
+    <div class="columns">
+      <div class="column is-three-quarters has-text-centered" v-if="!isExpired">
+        <b-field grouped group-multiline :disabled="isVoteDone">
+          <b-taglist
+            class="control"
+            attached
             v-for="answer in answers"
             :key="answer"
-            :type="chosen.includes(answer) ? 'is-success' : ''"
-            rounded
-            class="p-1 mr-3"
-            size="is-medium"
-            ><div
-              :class="{
-                'is-clickable': !isVoteDone,
-                'is-not-allowed': isVoteDone,
-              }"
-              @click="toggleAnswer(answer)"
-            >
-              {{ answer }}
-            </div></b-tag
+            :class="{
+              'is-clickable': !isVoteDone,
+              'is-not-allowed': isVoteDone,
+            }"
           >
-        </div>
+            <b-tag
+              rounded
+              @click.native="addTime(answer)"
+              class="p-4"
+              size="is-medium"
+              ><b-icon icon="calendar-plus"></b-icon
+            ></b-tag>
+            <b-tag
+              @click.native="addLocation(answer)"
+              class="p-3"
+              size="is-medium"
+              ><b-icon icon="map-marker-plus"></b-icon
+            ></b-tag>
+            <b-tag
+              @click.native="addPeople(answer)"
+              class="p-3"
+              size="is-medium"
+              ><b-icon icon="account-plus"></b-icon
+            ></b-tag>
+            <b-tag class="divider-left" size="is-medium"></b-tag>
+            <b-tag
+              rounded
+              :type="chosen.includes(answer) ? 'is-success' : ''"
+              @click.native="toggleAnswer(answer)"
+              size="is-medium"
+              >{{ answer }}</b-tag
+            >
+          </b-taglist>
+        </b-field>
         <b-input
           v-if="canWriteCustom"
           v-model="custom"
@@ -61,17 +84,22 @@
             </b-notification>
           </div>
         </div>
-        <div class="has-text-centered">
-          <b-button
-            class="is-primary mt-4"
-            :class="{ 'is-loading': isVoteLoading }"
-            @click="vote"
-            >Vote</b-button
-          >
-        </div>
-      </fieldset>
-    <br />
-    <date-picker inline show-helper-buttons switch-button-label="Whole days?" :helper-buttons="helperButtons" :disabled-dates="disabledDates" :initial-dates="initialDates"></date-picker>
+        <b-button
+          class="is-primary mt-4"
+          :class="{ 'is-loading': isVoteLoading }"
+          @click="vote"
+          >Vote</b-button
+        >
+        <br />
+        <date-picker
+          show-helper-buttons
+          switch-button-label="Whole days?"
+          :helper-buttons="helperButtons"
+          :disabled-dates="disabledDates"
+          :initial-dates="initialDates"
+        ></date-picker>
+      </div>
+      <div class="column is-one-quarter">text</div>
     </div>
     <!-- the id of this event is: {{ this.$route.params.id }}
     {{ votingMethod }} {{ canWriteCustom }} -->
@@ -110,50 +138,50 @@ export default class EventVote extends Vue {
   voteMessage = "";
   helperButtons = [
     {
-      "name": "Today",
-      "from": moment().toDate(),
-      "to": moment().endOf('day').toDate()
+      name: "Today",
+      from: moment().toDate(),
+      to: moment().endOf("day").toDate(),
     },
     {
-      "name": "Tomorrow",
-      "from": moment().add(1, "days").startOf('day').toDate(),
-      "to": moment().add(1, "days").endOf('day').toDate()
+      name: "Tomorrow",
+      from: moment().add(1, "days").startOf("day").toDate(),
+      to: moment().add(1, "days").endOf("day").toDate(),
     },
     {
-      "name": "48 Hours",
-      "from": moment().toDate(),
-      "to": moment().add(48, "hours").toDate()
+      name: "48 Hours",
+      from: moment().toDate(),
+      to: moment().add(48, "hours").toDate(),
     },
     {
-      "name": "Weekend",
-      "from": moment().weekday(5).toDate(),
-      "to": moment().weekday(6).endOf('day').toDate()
+      name: "Weekend",
+      from: moment().weekday(5).startOf("day").toDate(),
+      to: moment().weekday(6).endOf("day").toDate(),
     },
     {
-      "name": "End of Week",
-      "from": moment().toDate(),
-      "to": moment().endOf('week').endOf('day').toDate()
+      name: "To end of Week",
+      from: moment().toDate(),
+      to: moment().endOf("week").endOf("day").toDate(),
     },
     {
-      "name": "End of Month",
-      "from": moment().toDate(),
-      "to": moment().endOf('month').endOf('day').toDate()
+      name: "To end of Month",
+      from: moment().toDate(),
+      to: moment().endOf("month").endOf("day").toDate(),
     },
     {
-      "name": "One Week",
-      "from": moment().toDate(),
-      "to": moment().add(1, "week").toDate()
+      name: "One Week",
+      from: moment().toDate(),
+      to: moment().add(1, "week").toDate(),
     },
     {
-      "name": "One Month",
-      "from": moment().toDate(),
-      "to": moment().add(1, "month").toDate()
-    }
+      name: "One Month",
+      from: moment().toDate(),
+      to: moment().add(1, "month").toDate(),
+    },
   ];
   disabledDates = {
     custom(date: any) {
       return moment(date).isBefore(moment().subtract(1, "days"));
-    }
+    },
   };
   initialDates = [moment().toDate(), moment().add(1, "days").toDate()];
 
@@ -171,6 +199,16 @@ export default class EventVote extends Vue {
         this.chosen = ["__CUSTOM__VOTING__INPUT"];
       }
     }
+  }
+
+  addTime(val: string) {
+    console.log("adding time " + val);
+  }
+  addLocation(val: string) {
+    console.log("adding location " + val);
+  }
+  addPeople(val: string) {
+    console.log("adding people " + val);
   }
 
   toggleAnswer(answer: string) {
@@ -286,5 +324,11 @@ export default class EventVote extends Vue {
 <style scoped>
 .is-not-allowed {
   cursor: not-allowed;
+}
+.divider-left {
+  border-left: 2px solid#272727;
+  padding-left: 0.2rem !important;
+  padding-right: 0 !important;
+  margin-right: -0.2rem !important;
 }
 </style>

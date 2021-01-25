@@ -20,7 +20,7 @@
           @input="inputChanged(false)"
           id="focuselement"
         ></b-input>
-        <b-button class="ml-4" @click="add">Add</b-button>
+        <b-button class="ml-4" @click="add" icon-left="plus">Add</b-button>
       </b-field>
       <div class="field">
         <b-tag
@@ -39,7 +39,7 @@
     </div>
     <b-field class="has-text-centered mt-3">
       <b-button class="is-primary" rounded @click="done"
-        >Save</b-button
+        >Submit</b-button
       ></b-field
     >
   </div>
