@@ -117,7 +117,7 @@ export default class EventOptions extends Vue {
       },
       "answers": this.$store.state.answers
     };
-    axios.post("http://127.0.0.1:8000/event", JSON.stringify(data))
+    axios.post(process.env.VUE_APP_BACKEND_API_BASE_URL + "event", JSON.stringify(data))
       .then((response) => {
         this.isLoading = false;
         this.$store.commit("setEventId", response.data.id);

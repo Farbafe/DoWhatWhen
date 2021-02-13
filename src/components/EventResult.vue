@@ -115,7 +115,7 @@ export default class EventResult extends Vue {
   setupEmail() {
     if (this.email !== "") {
       this.isEmailRequestLoading = true;
-      axios.patch("http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/admin" , JSON.stringify({
+      axios.patch(process.env.VUE_APP_BACKEND_API_BASE_URL + "event/" + this.$store.state.eventId + "/admin" , JSON.stringify({
         "admin_email": this.email,
         "will_email_admin": true,
       })).then(() => {
@@ -149,10 +149,12 @@ export default class EventResult extends Vue {
 
   changeVoters(choice: string) {
     let voters: string[];
-    const data = choice;
+    const data = {
+      "answer": choice
+    };
     axios
       .post(
-        "http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/voters",
+        process.env.VUE_APP_BACKEND_API_BASE_URL + "event/" + this.$store.state.eventId + "/voters",
         data
       )
       .then((response) => {
@@ -226,7 +228,7 @@ export default class EventResult extends Vue {
     if (this.$store.state.question !== "") {
       this.question = this.$store.state.question;
     }
-    axios.get("http://127.0.0.1:8000/event/" + this.$store.state.eventId + "/result")
+    axios.get(process.env.VUE_APP_BACKEND_API_BASE_URL + "event/" + this.$store.state.eventId + "/result")
       .then((response) => {
         const data = response.data;
         let _data;

@@ -6,9 +6,9 @@
           <div class="container">
             <div class="navbar-menu">
               <div class="navbar-brand">
-                <router-link to="/" :key="$route.fullPath" class="navbar-item"
+                <a href="/" class="navbar-item"
                   ><img src="./assets/logo.png"
-                /></router-link>
+                /></a>
               </div>
               <div class="navbar-end">
                 <span class="navbar-item">
