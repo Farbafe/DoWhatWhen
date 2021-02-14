@@ -60,7 +60,7 @@
               <b-tag class="divider-left" size="is-medium"></b-tag>
               <b-tag
                 rounded
-                :type="chosen.includes(answer) ? 'is-success' : ''"
+                :type="chosenFindChoice(answer) !== -1 ? 'is-success' : ''"
                 @click.native="toggleAnswer(answer)"
                 size="is-medium"
                 >{{ answer }}</b-tag
@@ -158,7 +158,7 @@ export default class EventVote extends Vue {
   voteDeadline: Date | undefined;
   answers: string[] = [];
   question = "";
-  chosen: string[] = [];
+  chosen: Record<string, string | Record<string, string>[]>[] = [];
   chosenCustomIndex = -2;
   lastChosen = "";
   isAddingTime = false;
@@ -228,9 +228,12 @@ export default class EventVote extends Vue {
         this.chosen = [];
       }
       if (this.chosenCustomIndex === -2) {
-        this.chosenCustomIndex = this.chosen.length;
+        this.chosenCustomIndex = this.chosen.length;        
       }
-      this.chosen.splice(this.chosenCustomIndex, 1, this.custom);
+      if (this.chosen[this.chosenCustomIndex] === undefined) {
+        this.chosen.push({"choice": "", "dates": []});
+      }
+      this.chosen[this.chosenCustomIndex].choice = this.custom;
     } else {
       this.chosen.splice(this.chosenCustomIndex, 1);
       this.chosenCustomIndex = -2;
@@ -239,6 +242,13 @@ export default class EventVote extends Vue {
 
   dateApplied(start: Date, end: Date) {
     // TODO make each answer has sub array of times, push to this array
+    const index = this.chosenFindChoice(this.lastChosen);
+    const date = {
+      "start": start.toString(),
+      "end": end.toString()
+    };
+    let dates = this.chosen[index].dates as Record<string, string>[];
+    dates.push(date);
     this.isAddingTime = false;
     this.lastChosen = "";
   }
@@ -255,26 +265,44 @@ export default class EventVote extends Vue {
   //   console.log("adding people " + val);
   // }
 
+  chosenFindChoice(answer: string) {
+    let index = -1;
+    for (let i = 0; i != this.chosen.length; ++i) {
+      if (this.chosen[i].choice === answer) {
+        index = i;
+        break;
+      }
+    }
+    return index;
+  }
+
   toggleAnswer(answer: string) {
     if (this.isVoteDone) {
       return;
     }
     if (this.chosen.length === 1 && this.votingMethod === "Single Vote") {
-      if (answer !== this.chosen[0]) {
+      if (answer !== this.chosen[0].choice) {
         this.chosen = [];
         this.custom = "";
         this.chosenCustomIndex = -2;
       }
     }
-    const index = this.chosen.indexOf(answer);
+    const index = this.chosenFindChoice(answer);
     if (index === this.chosenCustomIndex) {
       this.custom = "";
       this.chosenCustomIndex = -2;
       return;
     }
     if (index === -1) {
-      this.chosen.push(answer);
+      const choice = {
+        "choice": answer,
+        "dates": []
+      };
+      this.chosen.push(choice);
     } else {
+      if (this.chosenCustomIndex !== -2 && this.chosenCustomIndex > index) {
+        this.chosenCustomIndex--;        
+      }
       this.chosen.splice(index, 1);
     }
   }
@@ -283,7 +311,7 @@ export default class EventVote extends Vue {
     this.voteNotification = false;
     if (
       this.chosen.length === 0 ||
-      (this.chosen.length === 1 && this.chosen[0] === "")
+      (this.chosen.length === 1 && this.chosen[0].choice === "")
     ) {
       this.voteMessage = "Please provide at least 1 choice before voting.";
       this.voteNotificationType = "is-danger";
@@ -291,19 +319,18 @@ export default class EventVote extends Vue {
       return;
     }
     if (this.votingMethod === "Ranked Voting" && this.mustRankAll) {
-      const didRankAll = this.answers.every((val) => this.chosen.includes(val));
+      let didRankAll = true;
+      for (const answer of this.answers) {
+        if (this.chosenFindChoice(answer) === -1) {
+          didRankAll = false;
+        }
+      }
       if (!didRankAll) {
         this.voteMessage =
           "This event requires that you rank all of the available choices.";
         this.voteNotificationType = "is-danger";
         this.voteNotification = true;
         return;
-      }
-    }
-    if (this.chosenCustomIndex !== -1) {
-      // avoid adding duplicates if user's custom choice already selected
-      if (this.chosen.indexOf(this.custom) === -1) {
-        this.chosen.splice(this.chosenCustomIndex, 0, this.custom);
       }
     }
     if (
