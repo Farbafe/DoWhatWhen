@@ -10,18 +10,18 @@
           <router-link :to="resultUrl">link.</router-link>
         </p>
         <div v-else>
+          You can add a date to your vote.<br />
           <p v-if="canWriteCustom">
-            This event allows you to vote for a choice you write!<br /><br />
+            This event allows you to vote for a custom answer.<br />
           </p>
           <p v-if="votingMethod === 'Single Vote'">
             You can only vote for 1 choice.
           </p>
-          <p v-else-if="votingMethod === 'Multiple Votes'">
-            You can vote for as many choices as you want.
-          </p>
           <p v-else>
-            You can vote for as many choices as you want. You can rank your
-            votes by clicking them in the order you like!
+            You can vote for as many choices as you want.
+            <span v-if="votingMethod === 'Ranked Voting'">
+              You can rank yourvotes by clicking them in the order you like.
+            </span>
           </p>
         </div>
         <section class="mt-4" v-if="!isExpired">
@@ -67,12 +67,34 @@
               >
             </b-taglist>
           </b-field>
-          <b-input
-            v-if="canWriteCustom"
-            v-model="custom"
-            placeholder="you can write your custom answer here"
-            @input="customInput"
-          ></b-input>
+          <div class="columns">
+            <div class="column is-1 pt-4 m-1 pr-1 has-text-right">
+              <b-icon icon="calendar-plus" class="is-clickable" @click.native="addTime(custom)"></b-icon>
+            </div>
+            <div class="column pl-1">
+              <b-input
+                v-if="canWriteCustom"
+                v-model="custom"
+                placeholder="you can write your custom answer here"
+                @input="customInput"
+                :class="{'is-disabled': this.isVoteLoading || this.isVoteDone}"
+              ></b-input>
+            </div>
+          </div>
+          <div
+            class="column is-half is-offset-one-quarter has-text-centered"
+            v-if="isAddingTime"
+          >
+            Adding time to <span class="has-text-weight-bold">{{ lastChosen }}</span>
+            <date-picker
+              show-helper-buttons
+              switch-button-label="Whole days?"
+              :helper-buttons="helperButtons"
+              :disabled-dates="disabledDates"
+              :initial-dates="initialDates"
+              @date-applied="dateApplied"
+            ></date-picker>
+          </div>
           <b-collapse :open="false" position="is-bottom" aria-id="moreOptions">
             <a slot="trigger" slot-scope="props" aria-controls="moreOptions">
               <b-icon :icon="!props.open ? 'menu-down' : 'menu-up'"></b-icon>
@@ -82,22 +104,6 @@
                 <!-- TODO drag and drop, delete, move up move down -->
           </b-collapse>
         </section>
-      </div>
-    </div>
-    <div class="columns is-multiline">
-      <div
-        class="column is-half is-offset-one-quarter has-text-centered"
-        v-if="isAddingTime"
-      >
-        Adding time to {{ lastChosen }}
-        <date-picker
-          show-helper-buttons
-          switch-button-label="Whole days?"
-          :helper-buttons="helperButtons"
-          :disabled-dates="disabledDates"
-          :initial-dates="initialDates"
-          @date-applied="dateApplied"
-        ></date-picker>
       </div>
     </div>
     <div class="columns is-multiline">
@@ -222,26 +228,32 @@ export default class EventVote extends Vue {
   initialDates = [moment().toDate(), moment().add(1, "days").toDate()];
 
   customInput() {
-    const isCustom = this.custom === "" ? false : true;
-    if (isCustom === true) {
-      if (this.votingMethod === "Single Vote") {
-        this.chosen = [];
-      }
+    const isCustom = this.custom !== "" ? true : false;
+    if (isCustom === true) {      
       if (this.chosenCustomIndex === -2) {
-        this.chosenCustomIndex = this.chosen.length;        
-      }
-      if (this.chosen[this.chosenCustomIndex] === undefined) {
+        if (this.votingMethod === "Single Vote") {
+          this.chosen = [];
+        }
+        this.chosenCustomIndex = this.chosen.length;
         this.chosen.push({"choice": "", "dates": []});
       }
+      if (this.lastChosen !== this.chosen[this.chosenCustomIndex].choice) {
+        this.isAddingTime = false;
+      }
       this.chosen[this.chosenCustomIndex].choice = this.custom;
+      this.lastChosen = this.custom;
     } else {
       this.chosen.splice(this.chosenCustomIndex, 1);
       this.chosenCustomIndex = -2;
+      this.isAddingTime = false;
+      this.lastChosen = "";
     }    
   }
 
   dateApplied(start: Date, end: Date) {
-    // TODO make each answer has sub array of times, push to this array
+    if (start === end) {
+      end = moment(end).add(1, 'd').toDate();
+    }
     const index = this.chosenFindChoice(this.lastChosen);
     const date = {
       "start": start.toString(),
@@ -254,6 +266,12 @@ export default class EventVote extends Vue {
   }
 
   addTime(val: string) {
+    if (this.isVoteDone || this.isVoteLoading) {
+      return;
+    }
+    if (this.chosenFindChoice(val) === -1) {
+      this.toggleAnswer(val);
+    }
     this.lastChosen = val;
     this.isAddingTime = true;
   }
@@ -277,7 +295,7 @@ export default class EventVote extends Vue {
   }
 
   toggleAnswer(answer: string) {
-    if (this.isVoteDone) {
+    if (this.isVoteDone || this.isVoteLoading) {
       return;
     }
     if (this.chosen.length === 1 && this.votingMethod === "Single Vote") {
@@ -298,10 +316,16 @@ export default class EventVote extends Vue {
         "choice": answer,
         "dates": []
       };
+      if (this.lastChosen !== answer) {
+        this.isAddingTime = false;
+      }
       this.chosen.push(choice);
     } else {
       if (this.chosenCustomIndex !== -2 && this.chosenCustomIndex > index) {
         this.chosenCustomIndex--;        
+      }
+      if (this.lastChosen === answer) {
+        this.isAddingTime = false;
       }
       this.chosen.splice(index, 1);
     }
@@ -360,6 +384,7 @@ export default class EventVote extends Vue {
         this.voteNotification = true;
       })
       .catch((error) => {
+        this.isVoteLoading = false;
         this.voteMessage = "Failed to submit your vote.";
         this.voteNotificationType = "is-danger";
         this.voteNotification = true;
