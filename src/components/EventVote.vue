@@ -67,13 +67,12 @@
               >
             </b-taglist>
           </b-field>
-          <div class="columns">
+          <div class="columns" v-if="canWriteCustom">
             <div class="column is-1 pt-4 m-1 pr-1 has-text-right">
               <b-icon icon="calendar-plus" class="is-clickable" @click.native="addTime(custom)"></b-icon>
             </div>
             <div class="column pl-1">
               <b-input
-                v-if="canWriteCustom"
                 v-model="custom"
                 placeholder="you can write your custom answer here"
                 @input="customInput"
@@ -93,7 +92,9 @@
               :disabled-dates="disabledDates"
               :initial-dates="initialDates"
               @date-applied="dateApplied"
+              ref="datepickerAddDate"
             ></date-picker>
+            <b-button class="is-primary mt-2" @click="dateAppliedWithoutDialog">Apply</b-button>
           </div>
           <b-collapse :open="false" position="is-bottom" aria-id="moreOptions">
             <a slot="trigger" slot-scope="props" aria-controls="moreOptions">
@@ -178,6 +179,7 @@ export default class EventVote extends Vue {
   voteNotificationType = "";
   voteMessage = "";
   isRankedVotingMessage = false;
+
   helperButtons = [
     {
       name: "Today",
@@ -220,6 +222,7 @@ export default class EventVote extends Vue {
       to: moment().add(1, "month").toDate(),
     },
   ];
+
   disabledDates = {
     custom(date: any) {
       return moment(date).isBefore(moment().subtract(1, "days"));
@@ -249,6 +252,13 @@ export default class EventVote extends Vue {
       this.lastChosen = "";
     }    
   }
+  
+  dateAppliedWithoutDialog() {
+    let el = this.$refs.datepickerAddDate as Vue;
+    let el2 = el.$children[0].$vnode.elm?.childNodes[0] as HTMLInputElement;
+    let el3 = el2.value.toString().split(' - ')
+    this.dateApplied(moment(el3[0], 'DD-MM-YYYY hh:mm').toDate(), moment(el3[1], 'DD-MM-YYYY hh:mm').toDate());
+  }
 
   dateApplied(start: Date, end: Date) {
     if (start === end) {
@@ -275,6 +285,7 @@ export default class EventVote extends Vue {
     this.lastChosen = val;
     this.isAddingTime = true;
   }
+
   addLocation(path: any, val: string) {
     console.log(path);    
     console.log("adding location " + val);

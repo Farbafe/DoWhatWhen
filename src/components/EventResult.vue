@@ -40,7 +40,7 @@
         As a group you chose: <b>{{ winners.join(", ") }}</b
         >.
       </p>
-      You can expand each choice to see who voted for it.
+      You can expand each choice to see who voted for it. You can click on each voter to see any and all times they have specified for that choice.
       <b-table
         :data="data"
         :paginated="true"
@@ -48,6 +48,7 @@
         :pagination-simple="true"
         default-sort-direction="desc"
         :pagination-rounded="true"
+        @details-open="(row, index) => loadVoters(row.choice)"
         detailed
         detail-key="choice"
         sort-icon="chevron-up"
@@ -61,7 +62,6 @@
         <b-table-column field="choice" label="Choice" v-slot="props">
           {{ props.row.choice }}
         </b-table-column>
-
         <b-table-column
           field="count"
           label="Count"
@@ -73,24 +73,44 @@
         </b-table-column>
         <template slot="detail" slot-scope="props">
           <div>
+            <date-picker :ref="'date-picker-' + props.row.choice" inline class="is-hidden"
+            :initial-dates="initialDates"
+            ></date-picker>
             <b-tag
               v-for="voter in props.row.voters"
               :key="voter"
               class="p-1 mr-3"
-              ><div @click="changeVoters(props.row.choice)" class="is-clickable">{{ voter }}</div></b-tag
+              ><div @click="showVoterTimes(props.row.choice, voter)" class="is-clickable">{{ voter }}</div></b-tag
             >
           </div>
         </template>
       </b-table>
+      <b-collapse :open="false" position="is-bottom" aria-id="moreOptions">
+        <a slot="trigger" slot-scope="props" aria-controls="moreOptions">
+          <b-icon :icon="!props.open ? 'menu-down' : 'menu-up'"></b-icon>
+          {{ !props.open ? "Show Results as Text" : "Close Results" }}
+        </a>
+        <vue-json-pretty class="has-text-left" :data="data"> </vue-json-pretty>
+      </b-collapse>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import DatePicker from "vue-time-date-range-picker/dist/vdprDatePicker";
 import axios from "axios";
+import { Dictionary } from "vue-router/types/router";
+import moment from "moment";
+import VueJsonPretty from 'vue-json-pretty';
+import "vue-json-pretty/lib/styles.css";
 
-@Component
+@Component({
+  components: {
+    DatePicker,
+    VueJsonPretty
+  },
+})
 export default class EventResult extends Vue {
   isUniqueUrl = false;
   question =
@@ -111,6 +131,7 @@ export default class EventResult extends Vue {
   emailNotification = false;
   emailMessage = "";
   emailMessageType = "";
+  initialDates = [moment().toDate(), moment().toDate()];
 
   setupEmail() {
     if (this.email !== "") {
@@ -147,7 +168,12 @@ export default class EventResult extends Vue {
     }
   }
 
-  changeVoters(choice: string) {
+  showVoterTimes(choice: String, voter: String) {
+    (this.$refs['date-picker-' + choice] as Vue).$el.classList.remove('is-hidden');
+    console.log("show times for " + choice + " by username " + voter);
+  }
+
+  loadVoters(choice: string) {
     let voters: string[];
     const data = {
       "answer": choice
@@ -163,7 +189,7 @@ export default class EventResult extends Vue {
           if (item.choice === choice) {
             item.voters = voters;
           }
-        });      
+        });
       })
       .catch((error) => {
         console.log(error);
