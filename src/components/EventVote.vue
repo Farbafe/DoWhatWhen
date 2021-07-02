@@ -24,6 +24,27 @@
             </span>
           </p>
         </div>
+        <b-field label="Username" horizontal class="mt-4"
+          >
+            <b-input
+              icon="account"
+              v-model="username"
+              :placeholder="usernamePlaceholder"
+              :required="!isVoterAnonymous"
+          />
+        </b-field>
+        <b-field label="Email" horizontal
+          ><b-tooltip position="is-right" :triggers="['click', 'hover', 'focus']"
+            ><template v-slot:content
+              >We never share your email with anyone.</template
+            >
+            <b-input
+              type="email"
+              icon="email"
+              v-model="email"
+              placeholder="email (optional)"
+          /></b-tooltip>
+        </b-field>
         <section class="mt-4" v-if="!isExpired">
           <b-field grouped group-multiline :disabled="isVoteDone">
             <b-taglist
@@ -111,7 +132,8 @@
       <div class="column is-offset-one-quarter is-half has-text-centered">
         <b-button
           class="is-primary mt-4"
-          :class="{ 'is-loading': isVoteLoading }"
+          :class="{ 'is-loading': isVoteLoading}"
+          :disabled="voteNotificationType === 'is-success'"
           @click="vote"
           >Vote</b-button
         >
@@ -161,10 +183,13 @@ export default class EventVote extends Vue {
   votingMethod = "";
   canWriteCustom = false;
   isVoterAnonymous = true; // if some1 has an account, do they choose to vote as non-anon even if not required?
+  usernamePlaceholder = "username";
   isVoteChangeable = false;
   voteDeadline: Date | undefined;
   answers: string[] = [];
   question = "";
+  username = "";
+  email = "";
   chosen: Record<string, string | Record<string, string>[]>[] = [];
   chosenCustomIndex = -2;
   lastChosen = "";
@@ -378,8 +403,8 @@ export default class EventVote extends Vue {
     this.isVoteLoading = true;
     const data = {
       votes: this.chosen,
-      voter_username: "username_placeholder",
-      voter_email: "email placeHOL><:DER!",
+      voter_username: this.username,
+      voter_email: this.email,
     };
     axios
       .post(
@@ -418,6 +443,7 @@ export default class EventVote extends Vue {
           this.answers = data.answers;
           this.question = data.question;
           this.mustRankAll = data.must_rank_all;
+          this.usernamePlaceholder += this.isVoterAnonymous ? " (optional)" : "" ;
           if (this.voteDeadline! < new Date()) {
             this.isExpired = true;
           }
