@@ -12,6 +12,15 @@
               </div>
               <div class="navbar-end">
                 <span class="navbar-item">
+                  <router-link
+                    to="/user"
+                    class="button is-primary is-inverted"
+                  >
+                    <b-icon icon="account"></b-icon>
+                    <span>Register/Login</span>
+                  </router-link>
+                </span>
+                <span class="navbar-item">
                   <a
                     href="https://github.com/Farbafe/DoWhatWhen"
                     target="_blank"

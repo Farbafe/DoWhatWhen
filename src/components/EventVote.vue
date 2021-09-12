@@ -34,7 +34,7 @@
           />
         </b-field>
         <b-field label="Email" horizontal
-          ><b-tooltip position="is-right" :triggers="['click', 'hover', 'focus']"
+          ><b-tooltip position="is-right" :triggers="['click', 'hover', 'focus']" style="display: block;"
             ><template v-slot:content
               >We never share your email with anyone.</template
             >
