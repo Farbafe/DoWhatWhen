@@ -73,14 +73,12 @@
         </b-table-column>
         <template slot="detail" slot-scope="props">
           <div>
-            <date-picker :ref="'date-picker-' + props.row.choice" inline class="is-hidden"
-            :initial-dates="initialDates"
-            ></date-picker>
+            <div :ref="'div-date-picker-' + props.row.choice" class="is-hidden"></div>
             <b-tag
-              v-for="voter in props.row.voters"
-              :key="voter"
+              v-for="(voter, keyVoter) in props.row.voters"
+              :key="keyVoter"
               class="p-1 mr-3"
-              ><div @click="showVoterTimes(props.row.choice, voter)" class="is-clickable">{{ voter }}</div></b-tag
+              ><div @click="showVoterTimes(props.row.choice, voter)" class="is-clickable">{{ keyVoter }}</div></b-tag
             >
           </div>
         </template>
@@ -168,13 +166,26 @@ export default class EventResult extends Vue {
     }
   }
 
-  showVoterTimes(choice: String, voter: String) {
-    (this.$refs['date-picker-' + choice] as Vue).$el.classList.remove('is-hidden');
-    console.log("show times for " + choice + " by username " + voter);
+  showVoterTimes(choice: String, voter: string[]) {
+    let datePickerClass = Vue.extend(DatePicker);
+    let datePicker: any;
+    (this.$refs['div-date-picker-' + choice] as Element).innerHTML = '';
+    (this.$refs['div-date-picker-' + choice] as Element).classList.add('is-hidden');
+    voter.forEach((vote) => {      
+      if (vote[0] != null) {
+        datePicker = new datePickerClass({
+          propsData: {
+            initialDates: [new Date(vote[0]), new Date(vote[1])],
+          }
+        });
+        datePicker.$mount();
+        (this.$refs['div-date-picker-' + choice] as Element).appendChild(datePicker.$el); // todo if user has no votes for time, let the person interacting with this button know
+        (this.$refs['div-date-picker-' + choice] as Element).classList.remove('is-hidden');
+      }
+    });
   }
 
   loadVoters(choice: string) {
-    let voters: string[];
     const data = {
       "answer": choice
     };
@@ -183,43 +194,54 @@ export default class EventResult extends Vue {
         process.env.VUE_APP_BACKEND_API_BASE_URL + "event/" + this.$store.state.eventId + "/voters",
         data
       )
-      .then((response) => {
-        voters = response.data;
-        this.data.forEach((item) => {
+      .then((response) => {        
+        let votes:[[string, string, string]] = response.data;
+        let voters:Record<string, string[][]> = {};
+        this.data.forEach((item) => { // sucks that we have to search through this.data but it is needed for props.row.choice above in Vue's html rendering part... todo find a different way like a dict to begin with, key is choice, then the key can be repeated again as choice, but at least the find will be O(1) instead of O(n) :(
           if (item.choice === choice) {
-            item.voters = voters;
-          }
-        });
+            let voterTimes: string[][];
+            votes.forEach((vote) => {
+              if (!voters[vote[0]]) {
+                voters[vote[0]] = [];
+              }
+              voters[vote[0]].push([vote[1], vote[2]]);
+            });
+            item.voters = voters;            
+          }          
+          // break;
+          
+        });            
       })
       .catch((error) => {
         console.log(error);
       });
   }
 
+  __voters: Record<string, string[][]> = {};
   data = [
-    { choice: "pizza", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "burger", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "sushi", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "potatoes", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "cupcakes", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "dougnuts", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "bananas", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "apples", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "pasta", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "spaghetti", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "steak", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "ham", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "cold cuts", count: 2, voters: ["click here to load voters for this choice"] },
-    {
-      choice:
-        "cook with best ingredients ever mate, it'd be so good!!!!!! indeeeed brother long text",
-      count: 3,
-      voters: ["click here to load voters for this choice"],
-    },
-    { choice: "subsandwich", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "sandwich", count: 3, voters: ["click here to load voters for this choice"] },
-    { choice: "roll", count: 2, voters: ["click here to load voters for this choice"] },
-    { choice: "pita", count: 3, voters: ["click here to load voters for this choice"] },
+    { choice: "pizza", count: 2, voters: this.__voters},
+    { choice: "burger", count: 3, voters: this.__voters},
+    // { choice: "sushi", count: 2, voters: {'': [['', '']]} },
+    // { choice: "potatoes", count: 3, voters: {'': [['', '']]} },
+    // { choice: "cupcakes", count: 2, voters: {'': [['', '']]} },
+    // { choice: "dougnuts", count: 3, voters: {'': [['', '']]} },
+    // { choice: "bananas", count: 2, voters: {'': [['', '']]} },
+    // { choice: "apples", count: 3, voters: {'': [['', '']]} },
+    // { choice: "pasta", count: 2, voters: {'': [['', '']]} },
+    // { choice: "spaghetti", count: 3, voters: {'': [['', '']]} },
+    // { choice: "steak", count: 2, voters: {'': [['', '']]} },
+    // { choice: "ham", count: 3, voters: {'': [['', '']]} },
+    // { choice: "cold cuts", count: 2, voters: {'': [['', '']]} },
+    // {
+    //   choice:
+    //     "cook with best ingredients ever mate, it'd be so good!!!!!! indeeeed brother long text",
+    //   count: 3,
+    //   voters: {'': [['', '']]},
+    // },
+    // { choice: "subsandwich", count: 2, voters: {'': [['', '']]} },
+    // { choice: "sandwich", count: 3, voters: {'': [['', '']]} },
+    // { choice: "roll", count: 2, voters: {'': [['', '']]} },
+    // { choice: "pita", count: 3, voters: {'': [['', '']]} },
   ];
   columns = [
     {
@@ -260,7 +282,7 @@ export default class EventResult extends Vue {
         let _data;
         this.data = [];
         Object.keys(data).forEach((key) => {
-          _data = {"choice":key, "count": data[key], "voters": ["click here to load voters for this choice"]};
+          _data = {"choice":key, "count": data[key], "voters": {"click here to load voters for this choice": [['']]}};
           this.data.push(_data);
         });
       })
