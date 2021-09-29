@@ -171,7 +171,7 @@ export default class EventResult extends Vue {
     let datePicker: any;
     (this.$refs['div-date-picker-' + choice] as Element).innerHTML = '';
     (this.$refs['div-date-picker-' + choice] as Element).classList.add('is-hidden');
-    voter.forEach((vote) => {      
+    voter.forEach((vote) => {
       if (vote[0] != null) {
         datePicker = new datePickerClass({
           propsData: {
@@ -179,10 +179,13 @@ export default class EventResult extends Vue {
           }
         });
         datePicker.$mount();
-        (this.$refs['div-date-picker-' + choice] as Element).appendChild(datePicker.$el); // todo if user has no votes for time, let the person interacting with this button know
-        (this.$refs['div-date-picker-' + choice] as Element).classList.remove('is-hidden');
+        (this.$refs['div-date-picker-' + choice] as Element).appendChild(datePicker.$el);
       }
     });
+    if ((this.$refs['div-date-picker-' + choice] as Element).innerHTML == '') {
+      (this.$refs['div-date-picker-' + choice] as Element).innerHTML = 'This voter has not voted for any particular time.';
+    }
+    (this.$refs['div-date-picker-' + choice] as Element).classList.remove('is-hidden');
   }
 
   loadVoters(choice: string) {
