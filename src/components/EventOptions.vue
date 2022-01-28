@@ -49,7 +49,7 @@
         <b-checkbox v-model="isResultLive">
           Result can be seen before deadline.</b-checkbox
         ><br />
-        <b-checkbox v-model="mustRankAll">
+        <b-checkbox v-model="mustRankAll" :disabled="voteMethod != 'Ranked Voting'">
           All choices have to be ranked in ranked voting.</b-checkbox
         ><br />
         <b-checkbox v-model="isResultPublic">
@@ -95,6 +95,7 @@ export default class EventOptions extends Vue {
   done() {
     this.isLoading = true;
     this.$store.commit("setEmail", this.email);
+    this.$store.commit('setVotingDeadline', this.voteDeadline);
     if (localStorage.getItem("eventAdminToken") === null) {
       localStorage.setItem("eventAdminToken", uuidv4());
     }

@@ -12,6 +12,7 @@ export default new Vuex.Store({
     isVoteWhen: true,
     answers: [],
     email: "",
+    votingDeadline: null
   },
   mutations: {
     setEventId(state, value) {
@@ -29,6 +30,9 @@ export default new Vuex.Store({
     setEmail(state, value) {
       state.email = value;
     },
+    setVotingDeadline(state, value) {
+      state.votingDeadline = value;
+    }
   },
   actions: {},
   modules: {}

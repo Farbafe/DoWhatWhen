@@ -115,14 +115,13 @@ export default class EventResult extends Vue {
     this.$store.state.question === ""
       ? "loading question"
       : this.$store.state.question;
-  votingDeadline =
-    new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString();
+  votingDeadline = this.$store.state.votingDeadline;
   isResultLoading = true; // TODO websocket.io for constant results showing
   isEmailRequestLoading = false;
   hasClearWinner = false;
   answers: Record<string, number> = {};
   isExpired = false;
-  isResultLive = true;
+  isResultLive = false; // TODO implement isResultLive async connection
   willEmail = false;
   winners = ["burger", "NOTburger"];
   email = ""; // TODO sould get email from server, by using a POST on the usual GET url and providing admin token, backend checks if same and returns different return type
@@ -270,9 +269,7 @@ export default class EventResult extends Vue {
       this.isUniqueUrl = true;
       this.$store.commit("setEventId", url[2]);
     }
-    if (Math.random() > 0.5) {
-      this.isExpired = true;
-    }
+    this.isExpired = new Date() > this.votingDeadline ? true : false;
     if (this.$store.state.email !== "") {
       this.email = this.$store.state.email;
     }
@@ -281,7 +278,10 @@ export default class EventResult extends Vue {
     }
     axios.get(process.env.VUE_APP_BACKEND_API_BASE_URL + "event/" + this.$store.state.eventId + "/result")
       .then((response) => {
-        const data = response.data;
+        const data = response.data.rows;
+        this.question = response.data.question;
+        this.votingDeadline = response.data.voting_deadline;
+        
         let _data;
         this.data = [];
         Object.keys(data).forEach((key) => {
