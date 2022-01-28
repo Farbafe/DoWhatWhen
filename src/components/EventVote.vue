@@ -185,7 +185,7 @@ export default class EventVote extends Vue {
   isVoterAnonymous = true; // if some1 has an account, do they choose to vote as non-anon even if not required?
   usernamePlaceholder = "username";
   isVoteChangeable = false;
-  voteDeadline: Date | undefined;
+  voteDeadline = "";
   answers: string[] = [];
   question = "";
   username = "";
@@ -444,7 +444,7 @@ export default class EventVote extends Vue {
           this.question = data.question;
           this.mustRankAll = data.must_rank_all;
           this.usernamePlaceholder += this.isVoterAnonymous ? " (optional)" : "" ;
-          if (this.voteDeadline! < new Date()) {
+          if (new Date(this.voteDeadline) < new Date()) {
             this.isExpired = true;
           }
         })

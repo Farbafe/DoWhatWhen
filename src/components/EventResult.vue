@@ -123,7 +123,7 @@ export default class EventResult extends Vue {
   isExpired = false;
   isResultLive = false; // TODO implement isResultLive async connection
   willEmail = false;
-  winners = ["burger", "NOTburger"];
+  winners: string[] = [];
   email = ""; // TODO sould get email from server, by using a POST on the usual GET url and providing admin token, backend checks if same and returns different return type
   emailNotification = false;
   emailMessage = "";
@@ -220,31 +220,7 @@ export default class EventResult extends Vue {
   }
 
   __voters: Record<string, string[][]> = {};
-  data = [
-    { choice: "pizza", count: 2, voters: this.__voters},
-    { choice: "burger", count: 3, voters: this.__voters},
-    // { choice: "sushi", count: 2, voters: {'': [['', '']]} },
-    // { choice: "potatoes", count: 3, voters: {'': [['', '']]} },
-    // { choice: "cupcakes", count: 2, voters: {'': [['', '']]} },
-    // { choice: "dougnuts", count: 3, voters: {'': [['', '']]} },
-    // { choice: "bananas", count: 2, voters: {'': [['', '']]} },
-    // { choice: "apples", count: 3, voters: {'': [['', '']]} },
-    // { choice: "pasta", count: 2, voters: {'': [['', '']]} },
-    // { choice: "spaghetti", count: 3, voters: {'': [['', '']]} },
-    // { choice: "steak", count: 2, voters: {'': [['', '']]} },
-    // { choice: "ham", count: 3, voters: {'': [['', '']]} },
-    // { choice: "cold cuts", count: 2, voters: {'': [['', '']]} },
-    // {
-    //   choice:
-    //     "cook with best ingredients ever mate, it'd be so good!!!!!! indeeeed brother long text",
-    //   count: 3,
-    //   voters: {'': [['', '']]},
-    // },
-    // { choice: "subsandwich", count: 2, voters: {'': [['', '']]} },
-    // { choice: "sandwich", count: 3, voters: {'': [['', '']]} },
-    // { choice: "roll", count: 2, voters: {'': [['', '']]} },
-    // { choice: "pita", count: 3, voters: {'': [['', '']]} },
-  ];
+  data = [{ choice: "", count: 0, voters: this.__voters}];
   columns = [
     {
       field: "count",
@@ -269,7 +245,7 @@ export default class EventResult extends Vue {
       this.isUniqueUrl = true;
       this.$store.commit("setEventId", url[2]);
     }
-    this.isExpired = new Date() > this.votingDeadline ? true : false;
+    
     if (this.$store.state.email !== "") {
       this.email = this.$store.state.email;
     }
@@ -281,12 +257,24 @@ export default class EventResult extends Vue {
         const data = response.data.rows;
         this.question = response.data.question;
         this.votingDeadline = response.data.voting_deadline;
+        this.isExpired = new Date() > new Date(this.votingDeadline) ? true : false;
         
         let _data;
         this.data = [];
+        let mostVotes = 0;
+        let keys = [''];
         Object.keys(data).forEach((key) => {
           _data = {"choice":key, "count": data[key], "voters": {"click here to load voters for this choice": [['']]}};
+          if (data[key] > mostVotes) {
+            mostVotes = data[key];
+            keys = [];
+            keys.push(key);
+          }
+          else if (data[key] === mostVotes) {
+            keys.push(key);
+          }
           this.data.push(_data);
+          this.winners = keys;
         });
       })
       .catch((error) => {
